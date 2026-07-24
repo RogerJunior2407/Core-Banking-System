@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CBS — Mini Core Banking System
 
 API REST développée avec Django / Django REST Framework dans le cadre du test technique Backend Django/DRF. Elle couvre la gestion des clients et wallets, les dépôts, les transferts entre wallets, le paiement de factures, ainsi que l'historique et le reporting des transactions.
@@ -222,3 +223,6 @@ Pistes recommandées pour la suite :
 - **Absence d'authentification** : aucune classe de permission n'est configurée sur les vues ; toutes les APIs sont actuellement accessibles sans authentification, alors que le cahier des charges mentionne la sécurité des API comme critère d'évaluation.
 - **Format de devise** : `Wallet.currency` a pour valeur par défaut `"fbi"` (minuscules) — à vérifier/uniformiser selon un format ISO 4217 (ex. `BIF`).
 - **Tests automatisés absents** — voir section [Tests](#tests).
+=======
+# Core-Banking-System
+>>>>>>> 3d2f86228e169e6c83fca37248113d45264738bf
