@@ -1,0 +1,256 @@
+{
+  "info": {
+    "name": "CBS - Mini Core Banking System",
+    "description": "Collection Postman pour l'API CBS (Clients & Wallets, Dépôts, Transferts, Paiements, Historique).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" },
+    { "key": "client_id", "value": "REPLACE_WITH_CLIENT_UUID" },
+    { "key": "wallet_id", "value": "1" },
+    { "key": "wallet_id_2", "value": "2" },
+    { "key": "provider_id", "value": "1" },
+    { "key": "bill_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Clients & Wallets",
+      "item": [
+        {
+          "name": "Lister les clients",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/client wallet/clients/", "host": ["{{base_url}}"], "path": ["client wallet", "clients", ""] }
+          }
+        },
+        {
+          "name": "Créer un client",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jean Niyonzima\",\n  \"age\": 34,\n  \"adress\": \"Bujumbura, Rohero\",\n  \"phone\": \"+25779000000\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/client wallet/clients/", "host": ["{{base_url}}"], "path": ["client wallet", "clients", ""] }
+          }
+        },
+        {
+          "name": "Détail d'un client",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/client wallet/clients/{{client_id}}/", "host": ["{{base_url}}"], "path": ["client wallet", "clients", "{{client_id}}", ""] }
+          }
+        },
+        {
+          "name": "Modifier un client",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+25779111111\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/client wallet/clients/{{client_id}}/", "host": ["{{base_url}}"], "path": ["client wallet", "clients", "{{client_id}}", ""] }
+          }
+        },
+        {
+          "name": "Supprimer un client",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/client wallet/clients/{{client_id}}/", "host": ["{{base_url}}"], "path": ["client wallet", "clients", "{{client_id}}", ""] }
+          }
+        },
+        {
+          "name": "Lister les wallets",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/client wallet/wallets/", "host": ["{{base_url}}"], "path": ["client wallet", "wallets", ""] }
+          }
+        },
+        {
+          "name": "Créer un wallet",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"client\": \"{{client_id}}\",\n  \"currency\": \"BIF\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/client wallet/wallets/", "host": ["{{base_url}}"], "path": ["client wallet", "wallets", ""] }
+          }
+        },
+        {
+          "name": "Détail d'un wallet",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/client wallet/wallets/{{wallet_id}}/", "host": ["{{base_url}}"], "path": ["client wallet", "wallets", "{{wallet_id}}", ""] }
+          }
+        },
+        {
+          "name": "Consulter le solde d'un wallet",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/client wallet/wallets/{{wallet_id}}/balance/", "host": ["{{base_url}}"], "path": ["client wallet", "wallets", "{{wallet_id}}", "balance", ""] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deposits",
+      "item": [
+        {
+          "name": "Historique des dépôts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/deposit/?wallet={{wallet_id}}&ordering=-created_at",
+              "host": ["{{base_url}}"],
+              "path": ["deposit", ""],
+              "query": [
+                { "key": "wallet", "value": "{{wallet_id}}" },
+                { "key": "ordering", "value": "-created_at" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Effectuer un dépôt",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wallet\": {{wallet_id}},\n  \"amount\": \"500.00\",\n  \"channel\": \"CASH\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/deposit/", "host": ["{{base_url}}"], "path": ["deposit", ""] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transfers",
+      "item": [
+        {
+          "name": "Historique des transferts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/transfer/?source_wallet={{wallet_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["transfer", ""],
+              "query": [{ "key": "source_wallet", "value": "{{wallet_id}}" }]
+            }
+          }
+        },
+        {
+          "name": "Effectuer un transfert",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source_wallet\": {{wallet_id}},\n  \"destination_wallet\": {{wallet_id_2}},\n  \"amount\": \"200.00\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/transfer/", "host": ["{{base_url}}"], "path": ["transfer", ""] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Paiement",
+      "item": [
+        {
+          "name": "Lister les fournisseurs",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/paiement/providers/", "host": ["{{base_url}}"], "path": ["paiement", "providers", ""] }
+          }
+        },
+        {
+          "name": "Créer un fournisseur",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"REGIDESO\",\n  \"category\": \"ELECTRICITY\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/paiement/providers/", "host": ["{{base_url}}"], "path": ["paiement", "providers", ""] }
+          }
+        },
+        {
+          "name": "Lister les factures",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/paiement/bills/?is_paid=false",
+              "host": ["{{base_url}}"],
+              "path": ["paiement", "bills", ""],
+              "query": [{ "key": "is_paid", "value": "false" }]
+            }
+          }
+        },
+        {
+          "name": "Créer une facture",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": {{provider_id}},\n  \"reference_number\": \"REF-2026-001\",\n  \"amount_due\": \"75.00\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/paiement/bills/", "host": ["{{base_url}}"], "path": ["paiement", "bills", ""] }
+          }
+        },
+        {
+          "name": "Historique des paiements",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/paiement/payments/", "host": ["{{base_url}}"], "path": ["paiement", "payments", ""] }
+          }
+        },
+        {
+          "name": "Payer une facture",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wallet\": {{wallet_id}},\n  \"bill\": {{bill_id}},\n  \"amount\": \"75.00\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/paiement/payments/", "host": ["{{base_url}}"], "path": ["paiement", "payments", ""] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Historique",
+      "item": [
+        {
+          "name": "Transactions d'un client",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/historique/clients/{{client_id}}/transactions/?type=DEPOSIT",
+              "host": ["{{base_url}}"],
+              "path": ["historique", "clients", "{{client_id}}", "transactions", ""],
+              "query": [{ "key": "type", "value": "DEPOSIT" }]
+            }
+          }
+        },
+        {
+          "name": "Statistiques d'un client",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/historique/clients/{{client_id}}/transactions/stats/",
+              "host": ["{{base_url}}"],
+              "path": ["historique", "clients", "{{client_id}}", "transactions", "stats", ""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
