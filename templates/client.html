@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exofin Client Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-main: #f4f6f9;
+            --bg-sidebar: #343a40;
+            --bg-card: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #6c757d;
+            --primary: #007bff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --border-color: #dee2e6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        aside {
+            width: 250px;
+            background-color: var(--bg-sidebar);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1rem;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            padding-left: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+        }
+
+        nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            color: #ffffff;
+            background-color: var(--primary);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        main {
+            margin-left: 250px;
+            flex-grow: 1;
+            padding: 2rem;
+            width: calc(100% - 250px);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .header-title h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 0.2rem;
+        }
+
+        .btn-refresh {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-refresh:hover {
+            background-color: #f8f9fa;
+            color: var(--text-primary);
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 992px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .metric-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem;
+        }
+
+        .metric-info h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+        }
+
+        .metric-info p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px solid #ced4da;
+            color: var(--text-primary);
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn {
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #ffffff;
+            border-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+
+        .wallets-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .credit-card {
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 140px;
+            transition: all 0.2s ease;
+        }
+
+        .credit-card:hover {
+            border-color: #80bdff;
+            background-color: #f1f3f5;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-logo {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #495057;
+            background-color: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .card-middle {
+            margin: 0.5rem 0;
+        }
+
+        .card-balance-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .card-balance {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .balance-reveal-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-decoration: underline;
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 0.75rem;
+            color: #495057;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        th {
+            background-color: #f1f3f5;
+            color: #495057;
+            font-weight: 600;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            background-color: #ffffff;
+        }
+
+        tr:hover td {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success { background-color: #d4edda; color: #155724; }
+        .badge-warning { background-color: #fff3cd; color: #856404; }
+        .badge-danger { background-color: #f8d7da; color: #721c24; }
+        .badge-primary { background-color: #cce5ff; color: #004085; }
+        .badge-info { background-color: #d1ecf1; color: #0c5460; }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .timeline-content {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+        }
+
+        .timeline-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .timeline-date {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .timeline-details {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .timeline-amount {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .timeline-amount.income { color: var(--success); }
+        .timeline-amount.expense { color: var(--danger); }
+
+        #toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 0.85rem;
+            min-width: 280px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-success { background-color: var(--success); }
+        .toast-error { background-color: var(--danger); }
+        .toast-info { background-color: var(--primary); }
+
+        .empty-state {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .card-footer-note {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        #login-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--bg-sidebar) 0%, var(--primary) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-card {
+            background-color: var(--bg-card);
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+        }
+
+        .login-card h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--bg-sidebar);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 auto 1.5rem;
+        }
+
+        .app-hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-wrapper">
+        <div class="login-card">
+            <div class="login-logo-circle">EXO</div>
+            <h1>Exofin Client Portal</h1>
+            <p>Access your banking space and manage your assets</p>
+            <form onsubmit="handleLoginSubmit(event)">
+                <div class="form-group" style="text-align: left;">
+                    <label for="login-client-select">Customer Account</label>
+                    <select id="login-client-select" class="form-control" required>
+                        <option value="" disabled selected>Loading accounts...</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Access Account</button>
+            </form>
+        </div>
+    </div>
+
+    <aside id="app-sidebar" class="app-hidden">
+        <div class="brand">
+            Exofin Client Space
+        </div>
+
+        <nav>
+            <a class="nav-item active" onclick="switchTab('dashboard')">My Overview</a>
+            <a class="nav-item" onclick="switchTab('transfers')">Send Money</a>
+            <a class="nav-item" onclick="switchTab('payments')">Pay Bills</a>
+            <a class="nav-item" onclick="switchTab('reports')">Statement</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <span style="font-size: 0.8rem; opacity: 0.8;">Signed in as:</span>
+            <strong id="sidebar-client-name" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">-</strong>
+            <button class="btn btn-secondary" onclick="performLogout()" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; width: auto; align-self: flex-start; margin-top: 0.5rem; background-color: var(--danger); border-color: var(--danger);">
+                Log Out
+            </button>
+        </div>
+    </aside>
+
+    <main id="app-main" class="app-hidden">
+        <header>
+            <div class="header-title">
+                <h2 id="current-tab-title">My Overview</h2>
+                <p id="current-tab-desc">Summary of your wallets and balances.</p>
+            </div>
+            <div>
+                <button class="btn-refresh" id="global-refresh-btn" onclick="refreshCurrentTabData()">
+                    Refresh
+                </button>
+            </div>
+        </header>
+
+        <div id="toast-container"></div>
+
+        <section id="tab-dashboard" class="tab-content active">
+            <div class="grid-3">
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <p>Active Wallets</p>
+                        <h3 id="stat-my-wallets">-</h3>
+                    </div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <p>Total Balance (FBI)</p>
+                        <h3 id="stat-total-fbi">-</h3>
+                    </div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <p>Total Balance (USD)</p>
+                        <h3 id="stat-total-usd">-</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header-flex">
+                        <h3 class="card-title">My Wallets</h3>
+                    </div>
+                    <div class="wallets-container" id="my-wallets-container">
+                        <div class="empty-state">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="card" style="height: fit-content;">
+                    <div class="card-header-flex">
+                        <h3 class="card-title">Quick Actions</h3>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <button class="btn btn-primary" onclick="switchTab('transfers')">Authorise Transfer</button>
+                        <button class="btn btn-secondary" onclick="switchTab('payments')">Settle utility Invoice</button>
+                        <button class="btn btn-secondary" onclick="switchTab('reports')">Check Statement History</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-transfers" class="tab-content">
+            <div class="grid-2">
+                <div class="card" style="height: fit-content;">
+                    <h3 class="card-title" style="margin-bottom: 0.75rem;">Authorize New Transfer</h3>
+                    <form id="record-transfer-form" onsubmit="handleRecordTransfer(event)">
+                        <div class="form-group">
+                            <label for="transfer-source-select">From My Wallet</label>
+                            <select id="transfer-source-select" class="form-control" required>
+                                <option value="" disabled selected>Select source...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="transfer-dest-select">To Destination Wallet</label>
+                            <select id="transfer-dest-select" class="form-control" required>
+                                <option value="" disabled selected>Select destination...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="transfer-amount">Amount</label>
+                            <input type="number" id="transfer-amount" class="form-control" placeholder="0.00" step="0.01" min="0.01" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Process Transfer</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 1rem;">My Transfer Logs</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Source Wallet</th>
+                                    <th>Destination Wallet</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transfers-history-body">
+                                <tr>
+                                    <td colspan="4" class="empty-state">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-payments" class="tab-content">
+            <div class="grid-2">
+                <div class="card" style="height: fit-content;">
+                    <h3 class="card-title" style="margin-bottom: 0.75rem;">Settle Utility Bill</h3>
+                    <form id="pay-bill-form" onsubmit="handlePayBill(event)">
+                        <div class="form-group">
+                            <label for="payment-wallet-select">Pay From My Wallet</label>
+                            <select id="payment-wallet-select" class="form-control" required>
+                                <option value="" disabled selected>Select paying wallet...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="payment-bill-select">Unpaid Utility Bill</label>
+                            <select id="payment-bill-select" class="form-control" onchange="autofillBillAmount()" required>
+                                <option value="" disabled selected>Select bill...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="payment-amount">Amount Due</label>
+                            <input type="number" id="payment-amount" class="form-control" placeholder="0.00" step="0.01" min="0.01" required readonly>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Settle Bill</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 1rem;">My Bill Settlement Logs</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Bill Reference</th>
+                                    <th>Wallet Used</th>
+                                    <th>Amount Settle</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payments-history-body">
+                                <tr>
+                                    <td colspan="3" class="empty-state">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-reports" class="tab-content">
+            <div class="card" style="background-color: #e9ecef;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <span class="badge badge-primary" style="margin-bottom: 0.25rem;">My Account Profile</span>
+                        <h3 id="report-profile-name" style="font-size: 1.25rem; font-weight: 700;">-</h3>
+                        <p id="report-profile-id" style="color: var(--text-secondary); font-size: 0.8rem; font-family: monospace;">ID: -</p>
+                    </div>
+                    <div style="display: flex; gap: 1.5rem; color: var(--text-secondary); font-size: 0.85rem;">
+                        <div><strong>Phone:</strong> <span id="report-profile-phone">-</span></div>
+                        <div><strong>Address:</strong> <span id="report-profile-address">-</span></div>
+                        <div><strong>Age:</strong> <span id="report-profile-age">-</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-3">
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <p>Total Deposits</p>
+                        <h3 id="report-stat-deposits">-</h3>
+                    </div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <p>Total Transfers</p>
+                        <h3 id="report-stat-transfers">-</h3>
+                    </div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <p>Total Payments</p>
+                        <h3 id="report-stat-payments">-</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title" style="margin-bottom: 1rem;">My Transactions Statement Timeline</h3>
+                <div class="timeline" id="report-timeline-container">
+                    <div class="empty-state">Loading timeline...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const state = {
+            clients: [],
+            wallets: [],
+            providers: [],
+            bills: [],
+            deposits: [],
+            transfers: [],
+            payments: [],
+            activeTab: 'dashboard',
+            loggedClientId: localStorage.getItem('logged_client_id') || null,
+            currentClient: null,
+            myWallets: []
+        };
+
+        const tabMeta = {
+            'dashboard': { title: 'My Overview', desc: 'Summary of your wallets and balances.' },
+            'transfers': { title: 'Send Money', desc: 'Transfer ledger amounts from your wallets instantly.' },
+            'payments': { title: 'Pay Bills', desc: 'Manage your bills and pay them using your active wallets.' },
+            'reports': { title: 'Account Statement', desc: 'Produce comprehensive transaction histories and summary audits for your account.' }
+        };
+
+        const API = {
+            clients: '/bank/clients/',
+            wallets: '/bank/wallets/',
+            deposits: '/deposit/',
+            transfers: '/transfer/',
+            providers: '/paiement/providers/',
+            bills: '/paiement/bills/',
+            payments: '/paiement/payments/',
+            history: (clientId) => `/historique/clients/${clientId}/transactions/`,
+            stats: (clientId) => `/historique/clients/${clientId}/transactions/stats/`
+        };
+
+        window.addEventListener('load', () => {
+            initializePage();
+        });
+
+        async function initializePage() {
+            await refreshAllData();
+            populateLoginDropdown();
+
+            if (state.loggedClientId) {
+                const clientExists = state.clients.some(c => c.id === state.loggedClientId);
+                if (clientExists) {
+                    showAppUI();
+                } else {
+                    performLogout();
+                }
+            } else {
+                showLoginUI();
+            }
+        }
+
+        function showLoginUI() {
+            document.getElementById('login-wrapper').classList.remove('app-hidden');
+            document.getElementById('app-sidebar').classList.add('app-hidden');
+            document.getElementById('app-main').classList.add('app-hidden');
+        }
+
+        function showAppUI() {
+            document.getElementById('login-wrapper').classList.add('app-hidden');
+            document.getElementById('app-sidebar').classList.remove('app-hidden');
+            document.getElementById('app-main').classList.remove('app-hidden');
+            
+            state.currentClient = state.clients.find(c => c.id === state.loggedClientId);
+            state.myWallets = state.wallets.filter(w => w.client === state.loggedClientId || (state.currentClient.wallets || []).some(cw => cw.id === w.id));
+
+            document.getElementById('sidebar-client-name').innerText = state.currentClient.name;
+            
+            switchTab(state.activeTab);
+        }
+
+        function populateLoginDropdown() {
+            const select = document.getElementById('login-client-select');
+            select.innerHTML = '<option value="" disabled selected>Select account...</option>';
+            state.clients.forEach(c => {
+                select.innerHTML += `<option value="${c.id}">${c.name} (${c.phone})</option>`;
+            });
+        }
+
+        function handleLoginSubmit(event) {
+            event.preventDefault();
+            const clientId = document.getElementById('login-client-select').value;
+            if (clientId) {
+                localStorage.setItem('logged_client_id', clientId);
+                state.loggedClientId = clientId;
+                showAppUI();
+            }
+        }
+
+        function performLogout() {
+            localStorage.removeItem('logged_client_id');
+            state.loggedClientId = null;
+            state.currentClient = null;
+            state.myWallets = [];
+            showLoginUI();
+        }
+
+        function switchTab(tabName) {
+            state.activeTab = tabName;
+            
+            document.querySelectorAll('nav .nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const activeIndex = ['dashboard', 'transfers', 'payments', 'reports'].indexOf(tabName);
+            const navItems = document.querySelectorAll('nav .nav-item');
+            if (navItems[activeIndex]) {
+                navItems[activeIndex].classList.add('active');
+            }
+
+            document.querySelectorAll('.tab-content').forEach(section => {
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(`tab-${tabName}`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            document.getElementById('current-tab-title').innerText = tabMeta[tabName].title;
+            document.getElementById('current-tab-desc').innerText = tabMeta[tabName].desc;
+
+            refreshTabUI(tabName);
+        }
+
+        async function refreshCurrentTabData() {
+            const refreshBtn = document.getElementById('global-refresh-btn');
+            refreshBtn.innerText = 'Refreshing...';
+            try {
+                await refreshAllData();
+                state.myWallets = state.wallets.filter(w => w.client === state.loggedClientId || (state.currentClient.wallets || []).some(cw => cw.id === w.id));
+                refreshTabUI(state.activeTab);
+            } catch (err) {
+                showToast('Failed to refresh data.', 'error');
+            } finally {
+                refreshBtn.innerText = 'Refresh';
+            }
+        }
+
+        async function refreshAllData() {
+            try {
+                const [clients, wallets, providers, bills, deposits, transfers, payments] = await Promise.all([
+                    fetchJSON(API.clients),
+                    fetchJSON(API.wallets),
+                    fetchJSON(API.providers),
+                    fetchJSON(API.bills),
+                    fetchJSON(API.deposits),
+                    fetchJSON(API.transfers),
+                    fetchJSON(API.payments)
+                ]);
+
+                state.clients = clients || [];
+                state.wallets = wallets || [];
+                state.providers = providers || [];
+                state.bills = bills || [];
+                state.deposits = deposits || [];
+                state.transfers = transfers || [];
+                state.payments = payments || [];
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function refreshTabUI(tabName) {
+            populateAllDropdowns();
+
+            switch(tabName) {
+                case 'dashboard':
+                    renderDashboardView();
+                    break;
+                case 'transfers':
+                    renderTransfersView();
+                    break;
+                case 'payments':
+                    renderPaymentsView();
+                    break;
+                case 'reports':
+                    loadClientReport();
+                    break;
+            }
+        }
+
+        async function fetchJSON(url, options = {}) {
+            const res = await fetch(url, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            });
+            if (!res.ok) {
+                let errMsg = `Status ${res.status}`;
+                try {
+                    const errBody = await res.json();
+                    if (errBody) {
+                        if (typeof errBody === 'object') {
+                            errMsg = Object.entries(errBody).map(([k, v]) => `${k}: ${v}`).join(', ');
+                        } else {
+                            errMsg = errBody;
+                        }
+                    }
+                } catch(e) {}
+                throw new Error(errMsg);
+            }
+            if (res.status === 204) return null;
+            return await res.json();
+        }
+
+        function renderDashboardView() {
+            document.getElementById('stat-my-wallets').innerText = state.myWallets.length;
+            
+            const sums = {};
+            state.myWallets.forEach(w => {
+                const cur = w.currency.toUpperCase();
+                sums[cur] = (sums[cur] || 0) + parseFloat(w.balance);
+            });
+
+            document.getElementById('stat-total-fbi').innerText = parseFloat(sums['FBI'] || 0).toFixed(2);
+            document.getElementById('stat-total-usd').innerText = parseFloat(sums['USD'] || 0).toFixed(2);
+
+            const container = document.getElementById('my-wallets-container');
+            container.innerHTML = '';
+
+            if (state.myWallets.length === 0) {
+                container.innerHTML = `<div class="empty-state">No active wallets.</div>`;
+                return;
+            }
+
+            state.myWallets.forEach(w => {
+                const card = document.createElement('div');
+                card.className = 'credit-card';
+                card.onclick = (e) => triggerCardBalanceRefresh(e, w.id);
+                card.innerHTML = `
+                    <div class="card-top">
+                        <span class="card-logo">${w.currency.toUpperCase()}</span>
+                        <span style="font-size:0.75rem; font-weight:bold;">ID: #${w.id}</span>
+                    </div>
+                    <div class="card-middle">
+                        <div class="card-balance-label">Balance</div>
+                        <div class="card-balance">
+                            <span id="card-bal-${w.id}">••••••</span>
+                            <button class="balance-reveal-btn" onclick="revealBalance(event, ${w.id}, '${parseFloat(w.balance).toFixed(2)}')">Show</button>
+                        </div>
+                    </div>
+                    <div class="card-bottom">
+                        <span>${state.currentClient.name}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function revealBalance(event, walletId, balance) {
+            event.stopPropagation();
+            const balanceSpan = document.getElementById(`card-bal-${walletId}`);
+            if (balanceSpan.innerText.includes('•')) {
+                balanceSpan.innerText = balance;
+                event.currentTarget.innerText = 'Hide';
+            } else {
+                balanceSpan.innerText = '••••••';
+                event.currentTarget.innerText = 'Show';
+            }
+        }
+
+        async function triggerCardBalanceRefresh(event, walletId) {
+            try {
+                const data = await fetchJSON(`/bank/wallets/${walletId}/balance/`);
+                const balanceSpan = document.getElementById(`card-bal-${walletId}`);
+                balanceSpan.innerText = parseFloat(data.balance).toFixed(2);
+                showToast(`Loaded: ${parseFloat(data.balance).toFixed(2)} ${data.currency}`, 'success');
+            } catch (err) {
+                showToast('Failed to check balance.', 'error');
+            }
+        }
+
+        function renderTransfersView() {
+            const tbody = document.getElementById('transfers-history-body');
+            tbody.innerHTML = '';
+
+            const myWalletIds = state.myWallets.map(w => w.id);
+            const myTransfers = state.transfers.filter(t => myWalletIds.includes(t.source_wallet) || myWalletIds.includes(t.destination_wallet));
+
+            if (myTransfers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No transfers recorded.</td></tr>`;
+                return;
+            }
+
+            const sorted = [...myTransfers].sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+            sorted.forEach(t => {
+                const isDebit = myWalletIds.includes(t.source_wallet);
+                const currency = getWalletCurrency(t.source_wallet);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>#${t.source_wallet} ${isDebit ? '(You)' : ''}</strong></td>
+                    <td><strong>#${t.destination_wallet} ${!isDebit ? '(You)' : ''}</strong></td>
+                    <td><strong class="timeline-amount ${isDebit ? 'expense' : 'income'}">${isDebit ? '-' : '+'}${parseFloat(t.amount).toFixed(2)} ${currency}</strong></td>
+                    <td>${formatDate(new Date(t.created_at))}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderPaymentsView() {
+            const tbody = document.getElementById('payments-history-body');
+            tbody.innerHTML = '';
+
+            const myWalletIds = state.myWallets.map(w => w.id);
+            const myPayments = state.payments.filter(p => myWalletIds.includes(p.wallet));
+
+            if (myPayments.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="empty-state">No payments made.</td></tr>`;
+            } else {
+                const sorted = [...myPayments].sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+                sorted.forEach(p => {
+                    const ref = getBillReference(p.bill);
+                    const cur = getWalletCurrency(p.wallet);
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${ref}</td>
+                        <td>#${p.wallet}</td>
+                        <td><span class="timeline-amount expense">-${parseFloat(p.amount).toFixed(2)} ${cur}</span></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+
+        function autofillBillAmount() {
+            const billSelect = document.getElementById('payment-bill-select');
+            const selectedBillId = parseInt(billSelect.value);
+            const bill = state.bills.find(b => b.id === selectedBillId);
+            if (bill) {
+                document.getElementById('payment-amount').value = parseFloat(bill.amount_due).toFixed(2);
+            }
+        }
+
+        function populateAllDropdowns() {
+            const tSource = document.getElementById('transfer-source-select');
+            if (tSource) {
+                const saved = tSource.value;
+                tSource.innerHTML = `<option value="" disabled selected>Select source...</option>`;
+                state.myWallets.forEach(w => {
+                    tSource.innerHTML += `<option value="${w.id}">Wallet #${w.id} (${parseFloat(w.balance).toFixed(2)} ${w.currency.toUpperCase()})</option>`;
+                });
+                if (saved && Array.from(tSource.options).some(o => o.value === saved)) {
+                    tSource.value = saved;
+                }
+            }
+
+            const tDest = document.getElementById('transfer-dest-select');
+            if (tDest) {
+                const saved = tDest.value;
+                tDest.innerHTML = `<option value="" disabled selected>Select destination...</option>`;
+                state.clients.forEach(c => {
+                    (c.wallets || []).forEach(w => {
+                        const isMine = w.client === state.loggedClientId || state.myWallets.some(mw => mw.id === w.id);
+                        tDest.innerHTML += `<option value="${w.id}">Wallet #${w.id} (Owner: ${c.name} ${isMine ? '— Yours' : ''})</option>`;
+                    });
+                });
+                if (saved && Array.from(tDest.options).some(o => o.value === saved)) {
+                    tDest.value = saved;
+                }
+            }
+
+            const pWallet = document.getElementById('payment-wallet-select');
+            if (pWallet) {
+                const saved = pWallet.value;
+                pWallet.innerHTML = `<option value="" disabled selected>Select wallet...</option>`;
+                state.myWallets.forEach(w => {
+                    pWallet.innerHTML += `<option value="${w.id}">Wallet #${w.id} (${parseFloat(w.balance).toFixed(2)} ${w.currency.toUpperCase()})</option>`;
+                });
+                if (saved && Array.from(pWallet.options).some(o => o.value === saved)) {
+                    pWallet.value = saved;
+                }
+            }
+
+            const billDD = document.getElementById('payment-bill-select');
+            if (billDD) {
+                const saved = billDD.value;
+                billDD.innerHTML = `<option value="" disabled selected>Select bill...</option>`;
+                const unpaid = state.bills.filter(b => !b.is_paid);
+                unpaid.forEach(b => {
+                    const providerName = getProviderName(b.provider);
+                    billDD.innerHTML += `<option value="${b.id}">${providerName} — ${b.reference_number} (${parseFloat(b.amount_due).toFixed(2)})</option>`;
+                });
+                if (saved && Array.from(billDD.options).some(o => o.value === saved)) {
+                    billDD.value = saved;
+                }
+            }
+        }
+
+        async function loadClientReport() {
+            const clientId = state.loggedClientId;
+            if (!clientId) return;
+
+            try {
+                const [stats, timeline] = await Promise.all([
+                    fetchJSON(API.stats(clientId)),
+                    fetchJSON(API.history(clientId))
+                ]);
+
+                document.getElementById('report-profile-name').innerText = state.currentClient.name;
+                document.getElementById('report-profile-id').innerText = `ID: ${state.currentClient.id}`;
+                document.getElementById('report-profile-phone').innerText = state.currentClient.phone || 'N/A';
+                document.getElementById('report-profile-address').innerText = state.currentClient.adress || 'N/A';
+                document.getElementById('report-profile-age').innerText = state.currentClient.age || 'N/A';
+
+                document.getElementById('report-stat-deposits').innerText = parseFloat(stats.total_deposits).toFixed(2);
+                document.getElementById('report-stat-transfers').innerText = parseFloat(stats.total_transfers).toFixed(2);
+                document.getElementById('report-stat-payments').innerText = parseFloat(stats.total_payments).toFixed(2);
+
+                const timelineContainer = document.getElementById('report-timeline-container');
+                timelineContainer.innerHTML = '';
+
+                if (!timeline || timeline.length === 0) {
+                    timelineContainer.innerHTML = `<div class="empty-state">No transaction history.</div>`;
+                } else {
+                    timeline.forEach(item => {
+                        const itemEl = document.createElement('div');
+                        itemEl.className = 'timeline-content';
+                        
+                        let typeLabel = '';
+                        let amountClass = 'expense';
+                        let amountSign = '-';
+                        let detailsHTML = '';
+
+                        const txDate = new Date(item.date);
+
+                        if (item.type === 'DEPOSIT') {
+                            typeLabel = 'DEPOSIT';
+                            amountClass = 'income';
+                            amountSign = '+';
+                            detailsHTML = `Loaded Wallet #${item.details.wallet} via ${item.details.channel}`;
+                        } else if (item.type === 'TRANSFER') {
+                            const isSource = isWalletOwnedByClient(item.details.source, clientId);
+                            if (isSource) {
+                                typeLabel = 'TRANSFER OUT';
+                                amountClass = 'expense';
+                                amountSign = '-';
+                                detailsHTML = `From Wallet #${item.details.source} to Wallet #${item.details.destination}`;
+                            } else {
+                                typeLabel = 'TRANSFER IN';
+                                amountClass = 'income';
+                                amountSign = '+';
+                                detailsHTML = `To Wallet #${item.details.destination} from Wallet #${item.details.source}`;
+                            }
+                        } else if (item.type === 'PAYMENT') {
+                            typeLabel = 'BILL SETTLEMENT';
+                            amountClass = 'expense';
+                            amountSign = '-';
+                            const ref = getBillReference(item.details.bill);
+                            detailsHTML = `Paid Bill ${ref} using Wallet #${item.details.wallet}`;
+                        }
+
+                        itemEl.innerHTML = `
+                            <div class="timeline-left">
+                                <span class="timeline-title">${typeLabel}</span>
+                                <span class="timeline-details">${detailsHTML}</span>
+                                <span class="timeline-date">${formatDate(txDate)}</span>
+                            </div>
+                            <span class="timeline-amount ${amountClass}">${amountSign}${parseFloat(item.amount).toFixed(2)}</span>
+                        `;
+                        timelineContainer.appendChild(itemEl);
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function handleRecordTransfer(event) {
+            event.preventDefault();
+            const src = parseInt(document.getElementById('transfer-source-select').value);
+            const dest = parseInt(document.getElementById('transfer-dest-select').value);
+            const amount = parseFloat(document.getElementById('transfer-amount').value);
+
+            if (src === dest) {
+                showToast('Source and destination wallets must be different.', 'error');
+                return;
+            }
+
+            try {
+                await fetchJSON(API.transfers, {
+                    method: 'POST',
+                    body: JSON.stringify({ source_wallet: src, destination_wallet: dest, amount })
+                });
+                document.getElementById('record-transfer-form').reset();
+                showToast('Transfer complete.', 'success');
+                await refreshAllData();
+                state.myWallets = state.wallets.filter(w => w.client === state.loggedClientId || (state.currentClient.wallets || []).some(cw => cw.id === w.id));
+                refreshTabUI(state.activeTab);
+            } catch (err) {
+                showToast('Failed to complete transfer.', 'error');
+            }
+        }
+
+        async function handlePayBill(event) {
+            event.preventDefault();
+            const walletId = parseInt(document.getElementById('payment-wallet-select').value);
+            const billId = parseInt(document.getElementById('payment-bill-select').value);
+            const amount = parseFloat(document.getElementById('payment-amount').value);
+
+            try {
+                await fetchJSON(API.payments, {
+                    method: 'POST',
+                    body: JSON.stringify({ wallet: walletId, bill: billId, amount })
+                });
+                document.getElementById('pay-bill-form').reset();
+                showToast('Bill settled.', 'success');
+                await refreshAllData();
+                state.myWallets = state.wallets.filter(w => w.client === state.loggedClientId || (state.currentClient.wallets || []).some(cw => cw.id === w.id));
+                refreshTabUI(state.activeTab);
+            } catch (err) {
+                showToast('Failed to settle bill.', 'error');
+            }
+        }
+
+        function getWalletCurrency(walletId) {
+            const w = state.wallets.find(x => x.id === walletId);
+            return w ? w.currency.toUpperCase() : 'fbi';
+        }
+
+        function isWalletOwnedByClient(walletId, clientId) {
+            const client = state.clients.find(c => c.id === clientId);
+            return client ? (client.wallets || []).some(w => w.id === walletId) : false;
+        }
+
+        function getProviderName(providerId) {
+            const p = state.providers.find(x => x.id === providerId);
+            return p ? p.name : `Provider #${providerId}`;
+        }
+
+        function getBillReference(billId) {
+            const b = state.bills.find(x => x.id === billId);
+            return b ? b.reference_number : `Bill #${billId}`;
+        }
+
+        function formatDate(dateObj) {
+            return dateObj.toLocaleDateString(undefined, {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        function showToast(message, type = 'info') {
+            if (type === 'success' || type === 'info') return;
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+
+            toast.offsetHeight;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

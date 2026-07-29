@@ -25,8 +25,6 @@ class WalletBalanceSerializer(serializers.ModelSerializer):
         model = Wallet
         fields = ['id', 'balance', 'currency']        
         
-
-
-
+        
         
         
