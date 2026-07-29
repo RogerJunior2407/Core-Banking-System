@@ -18,6 +18,7 @@ class BillListCreateView(generics.ListCreateAPIView):
     filterset_fields = ['provider', 'is_paid']
 
 
+
 class PaymentListCreateView(generics.ListCreateAPIView):
     queryset = Payment.objects.select_related('wallet', 'bill').all()
     serializer_class = PaymentSerializer
