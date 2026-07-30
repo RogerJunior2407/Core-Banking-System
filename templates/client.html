@@ -445,38 +445,6 @@
 
         .timeline-amount.income { color: var(--success); }
         .timeline-amount.expense { color: var(--danger); }
-
-        #toast-container {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .toast {
-            padding: 0.75rem 1rem;
-            border-radius: 4px;
-            color: #ffffff;
-            font-size: 0.85rem;
-            min-width: 280px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .toast-success { background-color: var(--success); }
-        .toast-error { background-color: var(--danger); }
-        .toast-info { background-color: var(--primary); }
-
         .empty-state {
             padding: 2rem;
             text-align: center;
@@ -597,9 +565,6 @@
                 </button>
             </div>
         </header>
-
-        <div id="toast-container"></div>
-
         <section id="tab-dashboard" class="tab-content active">
             <div class="grid-3">
                 <div class="card metric-card">
@@ -920,7 +885,7 @@
                 state.myWallets = state.wallets.filter(w => w.client === state.loggedClientId || (state.currentClient.wallets || []).some(cw => cw.id === w.id));
                 refreshTabUI(state.activeTab);
             } catch (err) {
-                showToast('Failed to refresh data.', 'error');
+                console.error(err);
             } finally {
                 refreshBtn.innerText = 'Refresh';
             }
@@ -1056,9 +1021,8 @@
                 const data = await fetchJSON(`/bank/wallets/${walletId}/balance/`);
                 const balanceSpan = document.getElementById(`card-bal-${walletId}`);
                 balanceSpan.innerText = parseFloat(data.balance).toFixed(2);
-                showToast(`Loaded: ${parseFloat(data.balance).toFixed(2)} ${data.currency}`, 'success');
             } catch (err) {
-                showToast('Failed to check balance.', 'error');
+                console.error(err);
             }
         }
 
@@ -1264,7 +1228,6 @@
             const amount = parseFloat(document.getElementById('transfer-amount').value);
 
             if (src === dest) {
-                showToast('Source and destination wallets must be different.', 'error');
                 return;
             }
 
@@ -1274,12 +1237,11 @@
                     body: JSON.stringify({ source_wallet: src, destination_wallet: dest, amount })
                 });
                 document.getElementById('record-transfer-form').reset();
-                showToast('Transfer complete.', 'success');
                 await refreshAllData();
                 state.myWallets = state.wallets.filter(w => w.client === state.loggedClientId || (state.currentClient.wallets || []).some(cw => cw.id === w.id));
                 refreshTabUI(state.activeTab);
             } catch (err) {
-                showToast('Failed to complete transfer.', 'error');
+                console.error(err);
             }
         }
 
@@ -1295,12 +1257,11 @@
                     body: JSON.stringify({ wallet: walletId, bill: billId, amount })
                 });
                 document.getElementById('pay-bill-form').reset();
-                showToast('Bill settled.', 'success');
                 await refreshAllData();
                 state.myWallets = state.wallets.filter(w => w.client === state.loggedClientId || (state.currentClient.wallets || []).some(cw => cw.id === w.id));
                 refreshTabUI(state.activeTab);
             } catch (err) {
-                showToast('Failed to settle bill.', 'error');
+                console.error(err);
             }
         }
 
@@ -1329,23 +1290,6 @@
                 year: 'numeric', month: 'short', day: 'numeric',
                 hour: '2-digit', minute: '2-digit'
             });
-        }
-
-        function showToast(message, type = 'info') {
-            if (type === 'success' || type === 'info') return;
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerText = message;
-            container.appendChild(toast);
-
-            toast.offsetHeight;
-            toast.classList.add('show');
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => toast.remove());
-            }, 3000);
         }
     </script>
 </body>

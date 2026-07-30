@@ -516,39 +516,6 @@
 
         .timeline-amount.income { color: var(--success); }
         .timeline-amount.expense { color: var(--danger); }
-
-        /* Toast Notifications (Standard alert bar style) */
-        #toast-container {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .toast {
-            padding: 0.75rem 1rem;
-            border-radius: 4px;
-            color: #ffffff;
-            font-size: 0.85rem;
-            min-width: 280px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .toast-success { background-color: var(--success); }
-        .toast-error { background-color: var(--danger); }
-        .toast-info { background-color: var(--primary); }
-
         .empty-state {
             padding: 2rem;
             text-align: center;
@@ -597,10 +564,6 @@
                 </button>
             </div>
         </header>
-
-        <!-- TOAST CONTAINER -->
-        <div id="toast-container"></div>
-
         <!-- 1. DASHBOARD TAB -->
         <section id="tab-dashboard" class="tab-content active">
             <div class="grid-3">
@@ -1059,9 +1022,7 @@
         });
 
         async function initializePage() {
-            showToast('Loading data from server...', 'info');
             await refreshAllData();
-            showToast('Database records synchronized.', 'success');
         }
 
         function switchTab(tabName) {
@@ -1101,9 +1062,8 @@
                 if (state.activeTab === 'reports' && state.selectedClientReport) {
                     await loadClientReport();
                 }
-                showToast('View refreshed.', 'success');
             } catch (err) {
-                showToast('Failed to refresh: ' + err.message, 'error');
+                console.error(err);
             } finally {
                 refreshBtn.innerText = 'Refresh';
             }
@@ -1130,7 +1090,6 @@
                 state.payments = payments || [];
             } catch (error) {
                 console.error("Fetch error:", error);
-                showToast('Database read error. Check if Django is running.', 'error');
             }
         }
 
@@ -1332,14 +1291,12 @@
         }
 
         async function triggerCardBalanceRefresh(event, walletId) {
-            showToast(`Checking Wallet #${walletId} balance...`, 'info');
             try {
                 const data = await fetchJSON(`/bank/wallets/${walletId}/balance/`);
                 const balanceSpan = document.getElementById(`card-bal-${walletId}`);
                 balanceSpan.innerText = parseFloat(data.balance).toFixed(2);
-                showToast(`Balance loaded: ${parseFloat(data.balance).toFixed(2)} ${data.currency}`, 'success');
             } catch (err) {
-                showToast('Failed to check balance: ' + err.message, 'error');
+                console.error(err);
             }
         }
 
@@ -1518,8 +1475,6 @@
             if (!clientId) return;
 
             state.selectedClientReport = clientId;
-            showToast('Loading statistics...', 'info');
-
             try {
                 const [stats, timeline] = await Promise.all([
                     fetchJSON(API.stats(clientId)),
@@ -1595,9 +1550,8 @@
                 }
 
                 document.getElementById('report-details-container').style.display = 'flex';
-                showToast('Report generated successfully.', 'success');
             } catch (err) {
-                showToast('Failed to compile reports: ' + err.message, 'error');
+                console.error(err);
             }
         }
 
@@ -1608,19 +1562,16 @@
             const age = ageInput ? parseInt(ageInput) : null;
             const phone = document.getElementById('client-phone').value.trim();
             const address = document.getElementById('client-address').value.trim();
-
-            showToast('Adding client...', 'info');
             try {
                 await fetchJSON(API.clients, {
                     method: 'POST',
                     body: JSON.stringify({ name, age, adress: address, phone })
                 });
                 document.getElementById('create-client-form').reset();
-                showToast('Client added.', 'success');
                 await refreshAllData();
                 refreshTabUI(state.activeTab);
             } catch (err) {
-                showToast('Failed: ' + err.message, 'error');
+                console.error(err);
             }
         }
 
@@ -1628,19 +1579,16 @@
             event.preventDefault();
             const clientId = document.getElementById('wallet-client-select').value;
             const currency = document.getElementById('wallet-currency').value;
-
-            showToast('Adding wallet...', 'info');
             try {
                 await fetchJSON(API.wallets, {
                     method: 'POST',
                     body: JSON.stringify({ client: clientId, currency })
                 });
                 document.getElementById('create-wallet-form').reset();
-                showToast('Wallet initialized.', 'success');
                 await refreshAllData();
                 refreshTabUI(state.activeTab);
             } catch (err) {
-                showToast('Failed: ' + err.message, 'error');
+                console.error(err);
             }
         }
 
@@ -1649,19 +1597,16 @@
             const walletId = parseInt(document.getElementById('deposit-wallet-select').value);
             const amount = parseFloat(document.getElementById('deposit-amount').value);
             const channel = document.getElementById('deposit-channel').value;
-
-            showToast('Processing deposit...', 'info');
             try {
                 await fetchJSON(API.deposits, {
                     method: 'POST',
                     body: JSON.stringify({ wallet: walletId, amount, channel })
                 });
                 document.getElementById('record-deposit-form').reset();
-                showToast('Deposit complete.', 'success');
                 await refreshAllData();
                 refreshTabUI(state.activeTab);
             } catch (err) {
-                showToast('Failed: ' + err.message, 'error');
+                console.error(err);
             }
         }
 
@@ -1672,22 +1617,18 @@
             const amount = parseFloat(document.getElementById('transfer-amount').value);
 
             if (src === dest) {
-                showToast('Error: Source and destination wallets must be different.', 'error');
                 return;
             }
-
-            showToast('Processing transfer...', 'info');
             try {
                 await fetchJSON(API.transfers, {
                     method: 'POST',
                     body: JSON.stringify({ source_wallet: src, destination_wallet: dest, amount })
                 });
                 document.getElementById('record-transfer-form').reset();
-                showToast('Transfer complete.', 'success');
                 await refreshAllData();
                 refreshTabUI(state.activeTab);
             } catch (err) {
-                showToast('Failed: ' + err.message, 'error');
+                console.error(err);
             }
         }
 
@@ -1695,19 +1636,16 @@
             event.preventDefault();
             const name = document.getElementById('provider-name').value.trim();
             const category = document.getElementById('provider-category').value;
-
-            showToast('Adding provider...', 'info');
             try {
                 await fetchJSON(API.providers, {
                     method: 'POST',
                     body: JSON.stringify({ name, category })
                 });
                 document.getElementById('create-provider-form').reset();
-                showToast('Provider registered.', 'success');
                 await refreshAllData();
                 refreshTabUI(state.activeTab);
             } catch (err) {
-                showToast('Failed: ' + err.message, 'error');
+                console.error(err);
             }
         }
 
@@ -1716,19 +1654,16 @@
             const providerId = parseInt(document.getElementById('bill-provider-select').value);
             const ref = document.getElementById('bill-ref').value.trim();
             const amount = parseFloat(document.getElementById('bill-amount').value);
-
-            showToast('Generating invoice...', 'info');
             try {
                 await fetchJSON(API.bills, {
                     method: 'POST',
                     body: JSON.stringify({ provider: providerId, reference_number: ref, amount_due: amount })
                 });
                 document.getElementById('create-bill-form').reset();
-                showToast('Invoice generated.', 'success');
                 await refreshAllData();
                 refreshTabUI(state.activeTab);
             } catch (err) {
-                showToast('Failed: ' + err.message, 'error');
+                console.error(err);
             }
         }
 
@@ -1737,19 +1672,16 @@
             const walletId = parseInt(document.getElementById('payment-wallet-select').value);
             const billId = parseInt(document.getElementById('payment-bill-select').value);
             const amount = parseFloat(document.getElementById('payment-amount').value);
-
-            showToast('Processing payment...', 'info');
             try {
                 await fetchJSON(API.payments, {
                     method: 'POST',
                     body: JSON.stringify({ wallet: walletId, bill: billId, amount })
                 });
                 document.getElementById('pay-bill-form').reset();
-                showToast('Bill settled.', 'success');
                 await refreshAllData();
                 refreshTabUI(state.activeTab);
             } catch (err) {
-                showToast('Failed: ' + err.message, 'error');
+                console.error(err);
             }
         }
 
@@ -1784,22 +1716,6 @@
                 year: 'numeric', month: 'short', day: 'numeric',
                 hour: '2-digit', minute: '2-digit'
             });
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerText = message;
-            container.appendChild(toast);
-
-            toast.offsetHeight; // force reflow
-            toast.classList.add('show');
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => toast.remove());
-            }, 3000);
         }
     </script>
 </body>
