@@ -21,6 +21,9 @@ class TransferSerializer(serializers.ModelSerializer):
         if source.pk == destination.pk:
             raise serializers.ValidationError("Source and destination wallets must be different.")
 
+        if source.currency.lower() != destination.currency.lower():
+            raise serializers.ValidationError("Source and destination wallets must have the same currency.")
+
         if source.balance < amount:
             raise serializers.ValidationError("Insufficient balance in source wallet.")
 

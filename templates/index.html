@@ -532,6 +532,28 @@
             color: var(--text-secondary);
             margin-top: 0.5rem;
         }
+
+        .form-feedback-message {
+            display: none;
+            margin-top: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .form-success-message {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .form-error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .global-feedback-message {
+            margin: 0 0 1rem;
+        }
     </style>
 </head>
 <body>
@@ -564,6 +586,9 @@
                 </button>
             </div>
         </header>
+
+        <p id="global-feedback-message" class="form-feedback-message global-feedback-message" role="alert"></p>
+
         <!-- 1. DASHBOARD TAB -->
         <section id="tab-dashboard" class="tab-content active">
             <div class="grid-3">
@@ -655,6 +680,7 @@
                                 <input type="text" id="client-address" class="form-control" placeholder="123 Boulevard, Kinshasa" required>
                             </div>
                             <button type="submit" class="btn btn-primary">Create Client</button>
+                            <p id="client-form-message" class="form-feedback-message" role="alert"></p>
                         </form>
                     </div>
 
@@ -678,6 +704,7 @@
                                 </select>
                             </div>
                             <button type="submit" class="btn btn-primary">Initialize Wallet</button>
+                            <p id="wallet-form-message" class="form-feedback-message" role="alert"></p>
                         </form>
                         <div class="card-footer-note">Initial balance is 0.00. Execute a deposit to load money.</div>
                     </div>
@@ -721,6 +748,7 @@
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Process Deposit</button>
+                        <p id="deposit-form-message" class="form-feedback-message" role="alert"></p>
                     </form>
                 </div>
 
@@ -773,6 +801,7 @@
                             <input type="number" id="transfer-amount" class="form-control" placeholder="0.00" step="0.01" min="0.01" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Process Transfer</button>
+                        <p id="transfer-form-message" class="form-feedback-message" role="alert"></p>
                     </form>
                 </div>
 
@@ -821,6 +850,7 @@
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Register</button>
+                        <p id="provider-form-message" class="form-feedback-message" role="alert"></p>
                     </form>
                 </div>
 
@@ -845,6 +875,7 @@
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Generate</button>
+                        <p id="bill-form-message" class="form-feedback-message" role="alert"></p>
                     </form>
                 </div>
 
@@ -869,6 +900,7 @@
                             <input type="number" id="payment-amount" class="form-control" placeholder="0.00" step="0.01" min="0.01" required readonly>
                         </div>
                         <button type="submit" class="btn btn-primary">Settle Bill</button>
+                        <p id="payment-form-message" class="form-feedback-message" role="alert"></p>
                     </form>
                 </div>
             </div>
@@ -929,6 +961,7 @@
                         <option value="" disabled selected>Select client...</option>
                     </select>
                 </div>
+                <p id="report-form-message" class="form-feedback-message" role="alert"></p>
             </div>
 
             <!-- Report Details -->
@@ -1064,6 +1097,7 @@
                 }
             } catch (err) {
                 console.error(err);
+                showFormError('global-feedback-message', `Failed to refresh data: ${getErrorMessage(err)}`);
             } finally {
                 refreshBtn.innerText = 'Refresh';
             }
@@ -1090,6 +1124,7 @@
                 state.payments = payments || [];
             } catch (error) {
                 console.error("Fetch error:", error);
+                showFormError('global-feedback-message', `Failed to load data from server. ${getErrorMessage(error)}`);
             }
         }
 
@@ -1297,6 +1332,7 @@
                 balanceSpan.innerText = parseFloat(data.balance).toFixed(2);
             } catch (err) {
                 console.error(err);
+                showFormError('global-feedback-message', `Failed to check balance: ${getErrorMessage(err)}`);
             }
         }
 
@@ -1552,6 +1588,7 @@
                 document.getElementById('report-details-container').style.display = 'flex';
             } catch (err) {
                 console.error(err);
+                showFormError('report-form-message', `Failed to load report: ${getErrorMessage(err)}`);
             }
         }
 
@@ -1572,6 +1609,7 @@
                 refreshTabUI(state.activeTab);
             } catch (err) {
                 console.error(err);
+                showFormError('client-form-message', getErrorMessage(err));
             }
         }
 
@@ -1589,6 +1627,7 @@
                 refreshTabUI(state.activeTab);
             } catch (err) {
                 console.error(err);
+                showFormError('wallet-form-message', getErrorMessage(err));
             }
         }
 
@@ -1603,10 +1642,12 @@
                     body: JSON.stringify({ wallet: walletId, amount, channel })
                 });
                 document.getElementById('record-deposit-form').reset();
+                showFormSuccess('deposit-form-message', `Deposit of ${amount.toFixed(2)} processed successfully.`);
                 await refreshAllData();
                 refreshTabUI(state.activeTab);
             } catch (err) {
                 console.error(err);
+                showFormError('deposit-form-message', getErrorMessage(err));
             }
         }
 
@@ -1617,8 +1658,17 @@
             const amount = parseFloat(document.getElementById('transfer-amount').value);
 
             if (src === dest) {
+                showFormError('transfer-form-message', 'Source and destination wallets must be different.');
                 return;
             }
+
+            const sourceWallet = state.wallets.find(w => w.id === src);
+            const destWallet = state.wallets.find(w => w.id === dest);
+            if (sourceWallet && destWallet && sourceWallet.currency.toLowerCase() !== destWallet.currency.toLowerCase()) {
+                showFormError('transfer-form-message', 'Source and destination wallets must have the same currency.');
+                return;
+            }
+
             try {
                 await fetchJSON(API.transfers, {
                     method: 'POST',
@@ -1629,6 +1679,7 @@
                 refreshTabUI(state.activeTab);
             } catch (err) {
                 console.error(err);
+                showFormError('transfer-form-message', getErrorMessage(err));
             }
         }
 
@@ -1646,6 +1697,7 @@
                 refreshTabUI(state.activeTab);
             } catch (err) {
                 console.error(err);
+                showFormError('provider-form-message', getErrorMessage(err));
             }
         }
 
@@ -1664,6 +1716,7 @@
                 refreshTabUI(state.activeTab);
             } catch (err) {
                 console.error(err);
+                showFormError('bill-form-message', getErrorMessage(err));
             }
         }
 
@@ -1678,10 +1731,12 @@
                     body: JSON.stringify({ wallet: walletId, bill: billId, amount })
                 });
                 document.getElementById('pay-bill-form').reset();
+                showFormSuccess('payment-form-message', `Payment of ${amount.toFixed(2)} completed successfully.`);
                 await refreshAllData();
                 refreshTabUI(state.activeTab);
             } catch (err) {
                 console.error(err);
+                showFormError('payment-form-message', getErrorMessage(err));
             }
         }
 
@@ -1716,6 +1771,31 @@
                 year: 'numeric', month: 'short', day: 'numeric',
                 hour: '2-digit', minute: '2-digit'
             });
+        }
+
+        function getErrorMessage(err) {
+            return err && err.message ? err.message : 'An unexpected error occurred.';
+        }
+
+        function showFormMessage(elementId, message, type = 'success') {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            el.textContent = message;
+            el.classList.remove('form-success-message', 'form-error-message');
+            el.classList.add(type === 'error' ? 'form-error-message' : 'form-success-message');
+            el.style.display = 'block';
+            clearTimeout(el._hideTimer);
+            el._hideTimer = setTimeout(() => {
+                el.style.display = 'none';
+            }, type === 'error' ? 6000 : 4000);
+        }
+
+        function showFormSuccess(elementId, message) {
+            showFormMessage(elementId, message, 'success');
+        }
+
+        function showFormError(elementId, message) {
+            showFormMessage(elementId, message, 'error');
         }
     </script>
 </body>
