@@ -1,0 +1,45 @@
+{% extends 'client/base.html' %}
+{% block title %}Reports | CBS{% endblock %}
+{% block page_heading %}Reports{% endblock %}
+
+{% block content %}
+<div class="grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h3>Monthly summary</h3>
+            <span class="badge info">July 2026</span>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Deposits</td><td>12,500 XAF</td></tr>
+                <tr><td>Transfers</td><td>6,800 XAF</td></tr>
+                <tr><td>Fees</td><td>350 XAF</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Service status</h3>
+            <span class="badge success">Healthy</span>
+        </div>
+        <div class="list-group">
+            <div class="list-item">
+                <div><strong>Transfers</strong><p>Operational</p></div>
+            </div>
+            <div class="list-item">
+                <div><strong>Deposits</strong><p>Operational</p></div>
+            </div>
+            <div class="list-item">
+                <div><strong>Support</strong><p>Available 24/7</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

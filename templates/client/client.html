@@ -1,0 +1,82 @@
+{% extends 'client/base.html' %}
+{% block title %}Client Dashboard | CBS{% endblock %}
+{% block page_heading %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="grid-3">
+    <div class="card metric-card">
+        <div>
+            <div class="metric-label">Total balance</div>
+            <h3>15,240.00 XAF</h3>
+        </div>
+        <span class="badge success">+8.2%</span>
+    </div>
+    <div class="card metric-card">
+        <div>
+            <div class="metric-label">Last deposit</div>
+            <h3>2,500.00 XAF</h3>
+        </div>
+        <span class="badge info">Today</span>
+    </div>
+    <div class="card metric-card">
+        <div>
+            <div class="metric-label">Pending transfer</div>
+            <h3>1,200.00 XAF</h3>
+        </div>
+        <span class="badge warning">Review</span>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h3>Quick actions</h3>
+            <a class="btn btn-secondary" href="{% url 'client-report' %}">View reports</a>
+        </div>
+        <div class="quick-grid">
+            <a class="quick-card" href="{% url 'client-deposit' %}">
+                <strong>Make a deposit</strong>
+                <span>Top up your wallet in just a few seconds.</span>
+            </a>
+            <a class="quick-card" href="{% url 'client-transfer' %}">
+                <strong>Send a transfer</strong>
+                <span>Send money securely to another account.</span>
+            </a>
+            <a class="quick-card" href="{% url 'client-wallet' %}">
+                <strong>Manage wallets</strong>
+                <span>Review balances and card details instantly.</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Recent activity</h3>
+            <span class="badge success">Live</span>
+        </div>
+        <div class="list-group">
+            <div class="list-item">
+                <div>
+                    <strong>Deposit received</strong>
+                    <p>2,500 XAF from Mobile Money</p>
+                </div>
+                <span>10m ago</span>
+            </div>
+            <div class="list-item">
+                <div>
+                    <strong>Transfer completed</strong>
+                    <p>800 XAF sent to Grace</p>
+                </div>
+                <span>1h ago</span>
+            </div>
+            <div class="list-item">
+                <div>
+                    <strong>Wallet updated</strong>
+                    <p>Primary wallet balance refreshed</p>
+                </div>
+                <span>3h ago</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

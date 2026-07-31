@@ -1,0 +1,51 @@
+{% extends 'client/base.html' %}
+{% block title %}Deposit | CBS{% endblock %}
+{% block page_heading %}Deposit{% endblock %}
+
+{% block content %}
+<div class="grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h3>New deposit</h3>
+            <span class="badge info">Instant</span>
+        </div>
+        <form>
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input class="form-control" id="amount" type="text" placeholder="Enter amount" />
+            </div>
+            <div class="form-group">
+                <label for="method">Payment method</label>
+                <select class="form-control" id="method">
+                    <option>Mobile money</option>
+                    <option>Bank card</option>
+                    <option>Cash deposit</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="reference">Reference</label>
+                <input class="form-control" id="reference" type="text" placeholder="Optional note" />
+            </div>
+            <button class="btn btn-primary" type="button">Submit deposit</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Deposit guide</h3>
+            <span class="badge success">Fast</span>
+        </div>
+        <div class="list-group">
+            <div class="list-item">
+                <div><strong>Processing time</strong><p>Usually completed within minutes.</p></div>
+            </div>
+            <div class="list-item">
+                <div><strong>Minimum amount</strong><p>500 XAF</p></div>
+            </div>
+            <div class="list-item">
+                <div><strong>Supported channels</strong><p>Mobile money, cards, and direct bank deposit.</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

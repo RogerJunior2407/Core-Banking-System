@@ -15,18 +15,29 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path, include
 from django.views.generic import TemplateView
+from bank.views import (
+    ClientDashboardView,
+    ClientDepositView,
+    ClientReportView,
+    ClientTransferView,
+    ClientWalletView,
+)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', TemplateView.as_view(template_name='index.html'), name='index'),
-    path('client/', TemplateView.as_view(template_name='client.html'), name='client-index'),
+    path('', TemplateView.as_view(template_name='index.html'), name='home'),
+    path('client/', ClientDashboardView.as_view(), name='client-dashboard'),
+    path('client/wallet/', ClientWalletView.as_view(), name='client-wallet'),
+    path('client/deposit/', ClientDepositView.as_view(), name='client-deposit'),
+    path('client/transfer/', ClientTransferView.as_view(), name='client-transfer'),
+    path('client/report/', ClientReportView.as_view(), name='client-report'),
     path('bank/', include('bank.urls')),
     path('client wallet/', include('bank.urls')),
     path('deposit/', include('deposits.urls')),
     path('transfer/', include('transfer.urls')),
     path('paiement/', include('paiement.urls')),
-    path('historique/',include('historique.urls')),
-    
+    path('historique/', include('historique.urls')),
 ]

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Client Portal{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f4f6f9;
+            --bg-sidebar: #1f2937;
+            --bg-card: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --primary: #2563eb;
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --info: #0f766e;
+            --border-color: #e5e7eb;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .page-shell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, var(--bg-sidebar), #111827);
+            color: white;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .brand {
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.14);
+        }
+
+        .nav-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255,255,255,0.14);
+            color: white;
+        }
+
+        .main-panel {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+        }
+
+        .topbar h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .topbar p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .btn-refresh {
+            border: 1px solid var(--border-color);
+            background: white;
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .btn-refresh.spinning {
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1.3fr 0.9fr;
+            gap: 1rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.1rem;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.9rem;
+        }
+
+        .metric-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .metric-card h3 {
+            font-size: 1.4rem;
+            margin-top: 0.25rem;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge.success { background: rgba(22, 163, 74, 0.14); color: var(--success); }
+        .badge.warning { background: rgba(245, 158, 11, 0.14); color: var(--warning); }
+        .badge.info { background: rgba(15, 118, 110, 0.14); color: var(--info); }
+
+        .quick-grid {
+            display: grid;
+            gap: 0.7rem;
+        }
+
+        .quick-card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            background: #f9fafb;
+        }
+
+        .quick-card strong { display: block; margin-bottom: 0.2rem; }
+
+        .list-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.6rem;
+        }
+
+        .list-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+        .form-group { margin-bottom: 0.8rem; }
+        .form-group label { display: block; margin-bottom: 0.35rem; font-weight: 600; }
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font: inherit;
+        }
+        .btn {
+            display: inline-block;
+            border: none;
+            padding: 0.7rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: #e5e7eb; color: var(--text-primary); }
+        .table { width: 100%; border-collapse: collapse; margin-top: 0.6rem; }
+        .table th, .table td { padding: 0.7rem; border-bottom: 1px solid var(--border-color); text-align: left; }
+        .table th { color: var(--text-secondary); font-size: 0.85rem; }
+
+        @media (max-width: 900px) {
+            .page-shell { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .main-panel { padding: 1rem; }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <div class="page-shell">
+        <aside class="sidebar">
+            <div class="brand">CBS Client</div>
+            <nav class="nav-list">
+                <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'client-dashboard' %}">Dashboard</a>
+                <a class="nav-link {% if active_page == 'wallet' %}active{% endif %}" href="{% url 'client-wallet' %}">Wallet</a>
+                <a class="nav-link {% if active_page == 'deposit' %}active{% endif %}" href="{% url 'client-deposit' %}">Deposit</a>
+                <a class="nav-link {% if active_page == 'transfer' %}active{% endif %}" href="{% url 'client-transfer' %}">Transfer</a>
+                <a class="nav-link {% if active_page == 'report' %}active{% endif %}" href="{% url 'client-report' %}">Reports</a>
+            </nav>
+        </aside>
+
+        <main class="main-panel">
+            <header class="topbar">
+                <div>
+                    <h1>{% block page_heading %}{{ page_title }}{% endblock %}</h1>
+                    <p>Modern client banking experience built on your existing dashboard design.</p>
+                </div>
+                <button class="btn-refresh" type="button">↻</button>
+            </header>
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const refreshButton = document.querySelector('.btn-refresh');
+            if (refreshButton) {
+                refreshButton.addEventListener('click', function () {
+                    refreshButton.classList.add('spinning');
+                    setTimeout(function () { refreshButton.classList.remove('spinning'); }, 900);
+                });
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+
