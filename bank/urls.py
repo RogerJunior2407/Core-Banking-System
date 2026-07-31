@@ -1,5 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from .views import LoginView, SetPasswordView, logout_view, ClientDashboardView, ClientWalletView, ClientDepositView, ClientTransferView, ClientReportView
 from .views import (
     ClientViewSet,
     WalletViewSet,
@@ -19,4 +20,9 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='client-login'),
     path('set-password/', SetPasswordView.as_view(), name='client-set-password'),
     path('logout/', logout_view, name='client-logout'),
+    path('dashboard/', ClientDashboardView.as_view(), name='client-dashboard'),
+    path('wallet/', ClientWalletView.as_view(), name='client-wallet'),
+    path('deposit/', ClientDepositView.as_view(), name='client-deposit'),
+    path('transfer/', ClientTransferView.as_view(), name='client-transfer'),
+    path('report/', ClientReportView.as_view(), name='client-report'),
 ]

@@ -7,23 +7,33 @@
     <div class="card metric-card">
         <div>
             <div class="metric-label">Total balance</div>
-            <h3>15,240.00 XAF</h3>
+            <h3>{{ total_balance }} {{ currency }}</h3>
         </div>
-        <span class="badge success">+8.2%</span>
+        <span class="badge success">Live</span>
     </div>
     <div class="card metric-card">
         <div>
             <div class="metric-label">Last deposit</div>
-            <h3>2,500.00 XAF</h3>
+            {% if last_deposit %}
+            <h3>{{ last_deposit.amount }} {{ last_deposit.wallet.currency }}</h3>
+            <span class="badge info">{{ last_deposit.created_at|timesince }} ago</span>
+            {% else %}
+            <h3>—</h3>
+            <span class="badge info">No deposits yet</span>
+            {% endif %}
         </div>
-        <span class="badge info">Today</span>
     </div>
     <div class="card metric-card">
         <div>
-            <div class="metric-label">Pending transfer</div>
-            <h3>1,200.00 XAF</h3>
+            <div class="metric-label">Last transfer</div>
+            {% if last_transfer %}
+            <h3>{{ last_transfer.amount }} {{ last_transfer.source_wallet.currency }}</h3>
+            <span class="badge warning">{{ last_transfer.created_at|timesince }} ago</span>
+            {% else %}
+            <h3>—</h3>
+            <span class="badge warning">No transfers yet</span>
+            {% endif %}
         </div>
-        <span class="badge warning">Review</span>
     </div>
 </div>
 
@@ -55,27 +65,17 @@
             <span class="badge success">Live</span>
         </div>
         <div class="list-group">
+            {% for item in recent_activity %}
             <div class="list-item">
                 <div>
-                    <strong>Deposit received</strong>
-                    <p>2,500 XAF from Mobile Money</p>
+                    <strong>{{ item.title }}</strong>
+                    <p>{{ item.detail }}</p>
                 </div>
-                <span>10m ago</span>
+                <span>{{ item.date|timesince }} ago</span>
             </div>
-            <div class="list-item">
-                <div>
-                    <strong>Transfer completed</strong>
-                    <p>800 XAF sent to Grace</p>
-                </div>
-                <span>1h ago</span>
-            </div>
-            <div class="list-item">
-                <div>
-                    <strong>Wallet updated</strong>
-                    <p>Primary wallet balance refreshed</p>
-                </div>
-                <span>3h ago</span>
-            </div>
+            {% empty %}
+            <div class="list-item"><p>No recent activity.</p></div>
+            {% endfor %}
         </div>
     </div>
 </div>

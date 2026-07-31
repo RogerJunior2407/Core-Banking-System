@@ -4,27 +4,19 @@
 
 {% block content %}
 <div class="grid-3">
+    {% for wallet in wallets %}
     <div class="card metric-card">
         <div>
-            <div class="metric-label">Primary wallet</div>
-            <h3>8,450.00 XAF</h3>
+            <div class="metric-label">Wallet #{{ wallet.id }}</div>
+            <h3>{{ wallet.balance }} {{ wallet.currency }}</h3>
         </div>
-        <span class="badge success">Active</span>
+        <span class="badge {% if wallet.is_active %}success{% else %}warning{% endif %}">
+            {% if wallet.is_active %}Active{% else %}Inactive{% endif %}
+        </span>
     </div>
-    <div class="card metric-card">
-        <div>
-            <div class="metric-label">Savings wallet</div>
-            <h3>4,200.00 XAF</h3>
-        </div>
-        <span class="badge info">Safe</span>
-    </div>
-    <div class="card metric-card">
-        <div>
-            <div class="metric-label">Joint wallet</div>
-            <h3>2,590.00 XAF</h3>
-        </div>
-        <span class="badge warning">Review</span>
-    </div>
+    {% empty %}
+    <div class="card"><p>Aucun wallet trouvé.</p></div>
+    {% endfor %}
 </div>
 
 <div class="card">
@@ -42,9 +34,16 @@
             </tr>
         </thead>
         <tbody>
-            <tr><td>2026-07-31</td><td>Primary</td><td>Deposit</td><td>+2,500 XAF</td></tr>
-            <tr><td>2026-07-30</td><td>Savings</td><td>Transfer</td><td>-300 XAF</td></tr>
-            <tr><td>2026-07-29</td><td>Joint</td><td>Deposit</td><td>+1,000 XAF</td></tr>
+            {% for item in activity %}
+            <tr>
+                <td>{{ item.date|date:"Y-m-d" }}</td>
+                <td>{{ item.wallet }}</td>
+                <td>{{ item.type }}</td>
+                <td>{{ item.sign }}{{ item.amount }} {{ item.wallet }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">Aucune activité récente.</td></tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>

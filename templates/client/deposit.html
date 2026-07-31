@@ -9,24 +9,31 @@
             <h3>New deposit</h3>
             <span class="badge info">Instant</span>
         </div>
-        <form>
+        <form id="deposit-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="wallet">Wallet</label>
+                <select class="form-control" id="wallet" required>
+                    <option value="" disabled selected>Select wallet...</option>
+                    {% for wallet in wallets %}
+                    <option value="{{ wallet.id }}">Wallet #{{ wallet.id }} — {{ wallet.balance }} {{ wallet.currency }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <div class="form-group">
                 <label for="amount">Amount</label>
-                <input class="form-control" id="amount" type="text" placeholder="Enter amount" />
+                <input class="form-control" id="amount" type="number" step="0.01" min="0.01" placeholder="Enter amount" required />
             </div>
             <div class="form-group">
                 <label for="method">Payment method</label>
                 <select class="form-control" id="method">
-                    <option>Mobile money</option>
-                    <option>Bank card</option>
-                    <option>Cash deposit</option>
+                    <option value="MOBILE_MONEY">Mobile money</option>
+                    <option value="BANK_TRANSFER">Bank card</option>
+                    <option value="CASH">Cash deposit</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="reference">Reference</label>
-                <input class="form-control" id="reference" type="text" placeholder="Optional note" />
-            </div>
-            <button class="btn btn-primary" type="button">Submit deposit</button>
+            <div id="deposit-message"></div>
+            <button class="btn btn-primary" type="submit">Submit deposit</button>
         </form>
     </div>
 
@@ -48,4 +55,39 @@
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('deposit-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const wallet = document.getElementById('wallet').value;
+    const amount = document.getElementById('amount').value;
+    const channel = document.getElementById('method').value;
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const messageBox = document.getElementById('deposit-message');
+
+    try {
+        const response = await fetch('/deposit/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+            },
+            body: JSON.stringify({ wallet: parseInt(wallet), amount: amount, channel: channel }),
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            messageBox.innerHTML = `<p style="color:red;">${JSON.stringify(err)}</p>`;
+            return;
+        }
+
+        messageBox.innerHTML = `<p style="color:green;">Deposit successful!</p>`;
+        document.getElementById('deposit-form').reset();
+
+    } catch (err) {
+        messageBox.innerHTML = `<p style="color:red;">Something went wrong.</p>`;
+    }
+});
+</script>
 {% endblock %}

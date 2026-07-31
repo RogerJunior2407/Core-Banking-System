@@ -26,18 +26,19 @@ from bank.views import (
 )
 
 
+
+from django.views.generic import RedirectView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', TemplateView.as_view(template_name='index.html'), name='home'),
-    path('client/', ClientDashboardView.as_view(), name='client-dashboard'),
-    path('client/wallet/', ClientWalletView.as_view(), name='client-wallet'),
-    path('client/deposit/', ClientDepositView.as_view(), name='client-deposit'),
-    path('client/transfer/', ClientTransferView.as_view(), name='client-transfer'),
-    path('client/report/', ClientReportView.as_view(), name='client-report'),
-    path('bank/', include('bank.urls')),
-    path('client wallet/', include('bank.urls')),
+    path('', RedirectView.as_view(pattern_name='client-login', permanent=False), name='home'),
+    
+
+    path('client/', include('bank.urls')),
     path('deposit/', include('deposits.urls')),
     path('transfer/', include('transfer.urls')),
     path('paiement/', include('paiement.urls')),
     path('historique/', include('historique.urls')),
 ]
+   
+
