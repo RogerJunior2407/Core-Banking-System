@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+from django import forms
 
 class Client(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -24,9 +25,6 @@ class ClientAuth(models.Model):
         return check_password(raw_password, self.password)
 
         
-
-
-
 
 
 

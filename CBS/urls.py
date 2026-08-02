@@ -16,23 +16,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 from bank.views import (
     ClientDashboardView,
     ClientDepositView,
     ClientReportView,
-    ClientTransferView,
     ClientWalletView,
+    SetPasswordView,
+    logout_view,
+    AdminPortalView,
 )
 
-
-
-from django.views.generic import RedirectView
-
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', RedirectView.as_view(pattern_name='client-login', permanent=False), name='home'),
+   path('admin/', admin.site.urls),
+   path('administrateur/', AdminPortalView.as_view(), name='admin-portal'),
     
+    
+    path('', RedirectView.as_view(pattern_name='client-login', permanent=False), name='home'),
 
     path('client/', include('bank.urls')),
     path('deposit/', include('deposits.urls')),

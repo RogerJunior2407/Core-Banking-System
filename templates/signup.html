@@ -1,0 +1,37 @@
+{% extends 'client/base.html' %}
+{% block title %}Create an Account | CBS{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 40px auto; padding: 20px;">
+    <h2>Create Your Account</h2>
+    <p>Sign up to open a main banking wallet.</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert danger" style="color: red; margin-bottom: 15px;">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <small style="color: red;">{{ field.errors.0 }}</small>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px;">
+            Register Account
+        </button>
+    </form>
+    
+    <p style="margin-top: 20px; text-align: center;">
+        Already have an account? <a href="{% url 'client-login' %}">Log In</a>
+    </p>
+</div>
+{% endblock %}

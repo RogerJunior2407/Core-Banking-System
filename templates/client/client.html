@@ -1,82 +1,307 @@
 {% extends 'client/base.html' %}
-{% block title %}Client Dashboard | CBS{% endblock %}
-{% block page_heading %}Dashboard{% endblock %}
+{% block title %}{{ page_title }} | CBS{% endblock %}
+
+{% block styles %}
+<style>
+    .dashboard-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .hero-card {
+        background: #ffffff;
+        color: #111827;
+        border: 1px solid #e5e7eb;
+        border-radius: 20px;
+        padding: 1.25rem 1.4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+    }
+
+    .hero-card h2 {
+        font-size: 1.45rem;
+        margin: 0.2rem 0;
+    }
+
+    .hero-meta {
+        color: #6b7280;
+        margin-top: 0.3rem;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        background: #eff6ff;
+        color: #1d4ed8;
+        padding: 0.6rem 0.8rem;
+        border-radius: 999px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .hero-badge .dot {
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        background: #34d399;
+        display: inline-block;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 1rem 1.1rem;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+    }
+
+    .stat-card.primary {
+        background: linear-gradient(135deg, #f8fbff 0%, #eff6ff 100%);
+        border-color: #bfdbfe;
+    }
+
+    .stat-label {
+        color: #6b7280;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .stat-card h3,
+    .stat-card h4 {
+        margin-top: 0.3rem;
+        color: #111827;
+    }
+
+    .stat-card h3 {
+        font-size: 1.35rem;
+    }
+
+    .stat-card small {
+        display: block;
+        margin-top: 0.3rem;
+        color: #6b7280;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.95fr;
+        gap: 1rem;
+    }
+
+    .panel {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 1rem 1.1rem;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+    }
+
+    .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.9rem;
+    }
+
+    .eyebrow {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #2563eb;
+    }
+
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+        padding: 0.6rem 0.9rem;
+    }
+
+    .wallet-create-form {
+        display: flex;
+        gap: 0.6rem;
+        align-items: center;
+    }
+
+    .wallet-create-form select {
+        min-width: 110px;
+        padding: 0.6rem 0.75rem;
+        border-radius: 10px;
+        border: 1px solid #d1d5db;
+    }
+
+    .wallet-list,
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+
+    .wallet-item,
+    .activity-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 0.9rem;
+        border-radius: 12px;
+        background: #f9fafb;
+        border: 1px solid #f3f4f6;
+    }
+
+    .wallet-id {
+        font-size: 0.78rem;
+        color: #6b7280;
+        margin-bottom: 0.2rem;
+    }
+
+    .wallet-status {
+        background: #dcfce7;
+        color: #166534;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .activity-item p {
+        margin-top: 0.2rem;
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    .activity-item span {
+        color: #6b7280;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .empty-state {
+        color: #6b7280;
+        padding: 0.6rem 0;
+    }
+
+    @media (max-width: 900px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .hero-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="grid-3">
-    <div class="card metric-card">
+<div class="dashboard-shell">
+    <section class="hero-card">
         <div>
-            <div class="metric-label">Total balance</div>
+            <p class="eyebrow">Client overview</p>
+            <h2>Welcome back, {{ client.name }} </h2>
+            <p class="hero-meta">Phone: {{ client.phone }} • Address: {{ client.adress|default:"N/A" }}</p>
+        </div>
+        <div class="hero-badge">
+            <span class="dot"></span>
+            {{ wallets|length }} active wallet{{ wallets|pluralize }}
+        </div>
+    </section>
+
+    <div class="stats-grid">
+        <article class="stat-card primary">
+            <p class="stat-label">Total balance</p>
             <h3>{{ total_balance }} {{ currency }}</h3>
-        </div>
-        <span class="badge success">Live</span>
-    </div>
-    <div class="card metric-card">
-        <div>
-            <div class="metric-label">Last deposit</div>
+        </article>
+
+        <article class="stat-card">
+            <p class="stat-label">Last deposit</p>
             {% if last_deposit %}
-            <h3>{{ last_deposit.amount }} {{ last_deposit.wallet.currency }}</h3>
-            <span class="badge info">{{ last_deposit.created_at|timesince }} ago</span>
+                <h4>{{ last_deposit.amount }} {{ currency }}</h4>
+                <small>{{ last_deposit.created_at|date:"M d, Y" }}</small>
             {% else %}
-            <h3>—</h3>
-            <span class="badge info">No deposits yet</span>
+                <p class="empty-state">No deposits recorded yet.</p>
             {% endif %}
-        </div>
-    </div>
-    <div class="card metric-card">
-        <div>
-            <div class="metric-label">Last transfer</div>
+        </article>
+
+        <article class="stat-card">
+            <p class="stat-label">Last transfer</p>
             {% if last_transfer %}
-            <h3>{{ last_transfer.amount }} {{ last_transfer.source_wallet.currency }}</h3>
-            <span class="badge warning">{{ last_transfer.created_at|timesince }} ago</span>
+                <h4>{{ last_transfer.amount }} {{ currency }}</h4>
+                <small>To wallet #{{ last_transfer.destination_wallet_id }}</small>
             {% else %}
-            <h3>—</h3>
-            <span class="badge warning">No transfers yet</span>
+                <p class="empty-state">No transfers yet.</p>
             {% endif %}
-        </div>
-    </div>
-</div>
-
-<div class="grid-2">
-    <div class="card">
-        <div class="card-header">
-            <h3>Quick actions</h3>
-            <a class="btn btn-secondary" href="{% url 'client-report' %}">View reports</a>
-        </div>
-        <div class="quick-grid">
-            <a class="quick-card" href="{% url 'client-deposit' %}">
-                <strong>Make a deposit</strong>
-                <span>Top up your wallet in just a few seconds.</span>
-            </a>
-            <a class="quick-card" href="{% url 'client-transfer' %}">
-                <strong>Send a transfer</strong>
-                <span>Send money securely to another account.</span>
-            </a>
-            <a class="quick-card" href="{% url 'client-wallet' %}">
-                <strong>Manage wallets</strong>
-                <span>Review balances and card details instantly.</span>
-            </a>
-        </div>
+        </article>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h3>Recent activity</h3>
-            <span class="badge success">Live</span>
-        </div>
-        <div class="list-group">
-            {% for item in recent_activity %}
-            <div class="list-item">
+    <div class="content-grid">
+        <section class="panel">
+            <div class="section-head">
                 <div>
-                    <strong>{{ item.title }}</strong>
-                    <p>{{ item.detail }}</p>
+                    <p class="eyebrow">Wallets</p>
+                    <h3>Your wallets</h3>
                 </div>
-                <span>{{ item.date|timesince }} ago</span>
+                <form action="{% url 'create-wallet' %}" method="POST" class="wallet-create-form">
+                    {% csrf_token %}
+                    {{ wallet_form.currency }}
+                    <button type="submit" class="btn btn-primary">+ New Wallet</button>
+                </form>
             </div>
-            {% empty %}
-            <div class="list-item"><p>No recent activity.</p></div>
-            {% endfor %}
-        </div>
+
+            {% if wallets %}
+                <div class="wallet-list">
+                    {% for wallet in wallets %}
+                        <div class="wallet-item">
+                            <div>
+                                <p class="wallet-id">Wallet #{{ wallet.id }}</p>
+                                <h4>{{ wallet.balance }} {{ wallet.currency }}</h4>
+                            </div>
+                            <span class="wallet-status">Active</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">No wallets available yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">Activity</p>
+                    <h3>Recent activity</h3>
+                </div>
+            </div>
+
+            {% if recent_activity %}
+                <ul class="activity-list">
+                    {% for item in recent_activity %}
+                        <li class="activity-item">
+                            <div>
+                                <strong>{{ item.title }}</strong>
+                                <p>{{ item.detail }}</p>
+                            </div>
+                            <span>{{ item.date|date:"M d" }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-state">No recent activity yet.</p>
+            {% endif %}
+        </section>
     </div>
 </div>
 {% endblock %}

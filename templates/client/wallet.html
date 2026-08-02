@@ -3,6 +3,17 @@
 {% block page_heading %}Wallet{% endblock %}
 
 {% block content %}
+<div class="card" style="margin-bottom: 1rem;">
+    <div class="card-header">
+        <h3>Create a new wallet</h3>
+    </div>
+    <form action="{% url 'create-wallet' %}" method="POST" style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+        {% csrf_token %}
+        {{ wallet_form.currency }}
+        <button type="submit" class="btn btn-primary">Create wallet</button>
+    </form>
+</div>
+
 <div class="grid-3">
     {% for wallet in wallets %}
     <div class="card metric-card">
@@ -10,9 +21,6 @@
             <div class="metric-label">Wallet #{{ wallet.id }}</div>
             <h3>{{ wallet.balance }} {{ wallet.currency }}</h3>
         </div>
-        <span class="badge {% if wallet.is_active %}success{% else %}warning{% endif %}">
-            {% if wallet.is_active %}Active{% else %}Inactive{% endif %}
-        </span>
     </div>
     {% empty %}
     <div class="card"><p>Aucun wallet trouvé.</p></div>
