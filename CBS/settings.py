@@ -24,8 +24,10 @@ SECRET_KEY = 'django-insecure-at+(ebl^4$-%_@)j1pf_i+_!+cy4@ek$os!s-o@sfy+^1+cz4t
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
+import os
+ALLOWED_HOSTS = ['core-banking-system-261r.onrender.com',
+    'localhost',
+    '127.0.0.1',]
 
 
 # Application definition
