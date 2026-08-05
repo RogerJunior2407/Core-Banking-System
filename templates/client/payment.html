@@ -12,7 +12,11 @@
         {% if messages %}
             <div class="card" style="margin-bottom: 1rem;">
                 {% for message in messages %}
-                    <p style="color: {{ 'green' if message.tags == 'success' else 'red' }}; margin: 0.5rem 0;">{{ message }}</p>
+                    {% if message.tags == 'success' %}
+                        <p style="color: green; margin: 0.5rem 0;">{{ message }}</p>
+                    {% else %}
+                        <p style="color: red; margin: 0.5rem 0;">{{ message }}</p>
+                    {% endif %}
                 {% endfor %}
             </div>
         {% endif %}
