@@ -14,6 +14,21 @@
     </form>
 </div>
 
+<div class="card" style="margin-bottom: 1rem;">
+    <div class="card-header">
+        <h3>Total amount across all wallets</h3>
+    </div>
+    <div class="card-body">
+        {% if wallet_totals %}
+            {% for total in wallet_totals %}
+            <p><strong>{{ total.currency }}</strong>: {{ total.total }}</p>
+            {% endfor %}
+        {% else %}
+            <p>No wallets found.</p>
+        {% endif %}
+    </div>
+</div>
+
 <div class="grid-3">
     {% for wallet in wallets %}
     <div class="card metric-card">

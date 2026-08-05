@@ -7,7 +7,7 @@ from .models import Client, Wallet, ClientAuth
 from .serializers import ChangePasswordserializer, ClientSerializer, WalletSerializer, WalletBalanceSerializer
 from django.contrib import messages
 from transfer.models import Transfer
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.views.generic import View, TemplateView
 from .forms import ClientSignUpForm, ClientLoginForm, CreateWalletForm
 from django.contrib.auth import authenticate, login, logout
@@ -117,6 +117,7 @@ class ClientWalletView(ClientPortalPageView):
         client_id = self.request.session.get('client_id')
         client = get_object_or_404(Client, id=client_id)
         wallets = Wallet.objects.filter(client=client)
+        wallet_totals = wallets.values('currency').annotate(total=Sum('balance'))
 
         # Historique combiné : dépôts + transferts
         from deposits.models import Deposit
@@ -150,6 +151,7 @@ class ClientWalletView(ClientPortalPageView):
         activity.sort(key=lambda x: x['date'], reverse=True)
 
         context['wallets'] = wallets
+        context['wallet_totals'] = wallet_totals
         context['activity'] = activity[:10]
         context['wallet_form'] = CreateWalletForm()
         return context
