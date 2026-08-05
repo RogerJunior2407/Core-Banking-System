@@ -153,6 +153,13 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+import sys
+
+# At the bottom of settings.py
+print("=========================================")
+print(f"ACTIVE DATABASE ENGINE: {DATABASES['default']['ENGINE']}")
+print(f"DATABASE NAME/HOST: {DATABASES['default'].get('HOST') or DATABASES['default'].get('NAME')}")
+print("=========================================")
 
 
 
