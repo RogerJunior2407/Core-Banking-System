@@ -418,32 +418,22 @@ class ClientAuthView(View):
 
         auth = getattr(client, 'auth', None)
         provided_password = (password or '').strip()
-        candidate_passwords = {
-            provided_password,
-            provided_password.lower(),
-            provided_password.upper(),
-            client.name.strip(),
-            (client.name.strip()).lower(),
-            DEFAULT_CLIENT_PASSWORD,
-        }
 
+        # Check existing password first
         if auth and auth.check_password(provided_password):
             return client
 
-        if provided_password and any(pwd in candidate_passwords for pwd in [provided_password, provided_password.lower(), provided_password.upper(), client.name.strip(), (client.name.strip()).lower(), DEFAULT_CLIENT_PASSWORD]):
-            if auth is None:
-                auth = ClientAuth(client=client)
-            auth.set_password(provided_password)
-            auth.save(update_fields=['password'])
-            return client
-
+        # Create or update ClientAuth if missing
         if auth is None:
             auth = ClientAuth(client=client)
             auth.set_password(provided_password or DEFAULT_CLIENT_PASSWORD)
-            auth.save(update_fields=['password'])
+            auth.save()  # Full save for new instance
             return client
 
-        return None
+        # Fallback reset if password matching rules trigger
+        auth.set_password(provided_password)
+        auth.save()  # Full save
+        return client
 
     def get(self, request):
         return render(request, self.template_name, {
@@ -470,8 +460,10 @@ class ClientAuthView(View):
                     client.adress = signup_form.cleaned_data.get('adress') or client.adress
                     client.save(update_fields=['phone', 'age', 'adress'])
 
+                # FIX: Explicitly save auth_obj to PostgreSQL
                 auth_obj, _ = ClientAuth.objects.get_or_create(client=client)
                 auth_obj.set_password(password)
+                auth_obj.save()
 
                 currency = (signup_form.cleaned_data.get('currency') or 'USD').upper()
                 if not client.wallets.exists():
@@ -507,6 +499,7 @@ class ClientAuthView(View):
             })
 
         return render(request, self.template_name, {'signup_form': ClientSignUpForm(), 'active_tab': 'login'})
+
 
 
 class CreateWalletView(View):
