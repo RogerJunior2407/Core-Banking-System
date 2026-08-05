@@ -89,19 +89,17 @@ WSGI_APPLICATION = 'CBS.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 import dj_database_url
 DATABASE_URL = os.environ.get('DATABASE_URL')
+
 if DATABASE_URL:
     DATABASES = {
-        
-        'default': dj_database_url.config(
-            
-            default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        'default': dj_database_url.parse(
+            DATABASE_URL,
             conn_max_age=600,
-             conn_health_checks=True,
+            conn_health_checks=True,
         )
-
     }
 else:
-    # Fallback for local development on your machine
+    # Local development fallback
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
