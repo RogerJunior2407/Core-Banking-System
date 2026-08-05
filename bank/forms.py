@@ -1,6 +1,7 @@
 # bank/forms.py
 from django import forms
 from bank.models import Client
+from paiement.models import ServiceProvider, Bill
 
 CURRENCY_CHOICES = [
     ('USD', 'USD'),
@@ -72,3 +73,34 @@ class CreateWalletForm(forms.Form):
         label='Currency',
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+
+
+class ClientPaymentForm(forms.Form):
+    provider = forms.ModelChoiceField(
+        queryset=ServiceProvider.objects.all(),
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'provider-select'})
+    )
+    bill = forms.ModelChoiceField(
+        queryset=Bill.objects.filter(is_paid=False),
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'bill-select'})
+    )
+    amount = forms.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        min_value=0.01,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'id': 'payment-amount',
+            'placeholder': 'Enter payment amount',
+            'step': '0.01'
+        })
+    )
+
+    def __init__(self, *args, providers=None, bills=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if providers is not None:
+            self.fields['provider'].queryset = providers
+        if bills is not None:
+            self.fields['bill'].queryset = bills

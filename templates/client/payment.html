@@ -1,0 +1,157 @@
+{% extends 'client/base.html' %}
+{% block title %}Pay Bill | CBS{% endblock %}
+{% block page_heading %}Pay Bill{% endblock %}
+
+{% block content %}
+<div class="grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h3>Bill payment</h3>
+        </div>
+
+        {% if messages %}
+            <div class="card" style="margin-bottom: 1rem;">
+                {% for message in messages %}
+                    <p style="color: {{ 'green' if message.tags == 'success' else 'red' }}; margin: 0.5rem 0;">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form id="payment-form" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="provider-select">Service provider</label>
+                <select class="form-control" id="provider-select" name="provider" required>
+                    <option value="" disabled {% if not payment_form['provider'].value %}selected{% endif %}>Select provider...</option>
+                    {% for provider in providers %}
+                        <option value="{{ provider.id }}" {% if payment_form['provider'].value|stringformat:'s' == provider.id|stringformat:'s' %}selected{% endif %}>
+                            {{ provider.name }} ({{ provider.category }})
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if payment_form.errors.provider %}
+                    <p class="empty-state">{{ payment_form.errors.provider|join:', ' }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="bill-select">Bill</label>
+                <select class="form-control" id="bill-select" name="bill" required>
+                    <option value="" disabled {% if not payment_form['bill'].value %}selected{% endif %}>Select bill...</option>
+                    {% for bill in bills %}
+                        <option value="{{ bill.id }}" data-provider="{{ bill.provider_id }}" data-amount="{{ bill.amount_due }}" {% if payment_form['bill'].value|stringformat:'s' == bill.id|stringformat:'s' %}selected{% endif %}>
+                            {{ bill.provider.name }} - {{ bill.reference_number }} ({{ bill.amount_due }})
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if payment_form.errors.bill %}
+                    <p class="empty-state">{{ payment_form.errors.bill|join:', ' }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="payment-amount">Amount</label>
+                <input 
+                    class="form-control" 
+                    id="payment-amount" 
+                    name="amount" 
+                    type="number" 
+                    step="0.01" 
+                    min="0.01" 
+                    placeholder="Enter amount" 
+                    value="{{ payment_form['amount'].value|default_if_none:'' }}" 
+                    required
+                />
+                {% if payment_form.errors.amount %}
+                    <p class="empty-state">{{ payment_form.errors.amount|join:', ' }}</p>
+                {% endif %}
+            </div>
+
+            {% if payment_form.non_field_errors %}
+                <div class="form-group">
+                    <p class="empty-state">{{ payment_form.non_field_errors|join:', ' }}</p>
+                </div>
+            {% endif %}
+
+            <button class="btn btn-primary" type="submit">Submit payment</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Unpaid bills</h3>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Provider</th>
+                    <th>Reference</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if bills %}
+                    {% for bill in bills %}
+                        <tr>
+                            <td>{{ bill.provider.name }}</td>
+                            <td>{{ bill.reference_number }}</td>
+                            <td>{{ bill.amount_due }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3">No unpaid bills.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const providerSelect = document.getElementById('provider-select');
+    const billSelect = document.getElementById('bill-select');
+    const amountInput = document.getElementById('payment-amount');
+
+    function updateBillOptions() {
+        const selectedProviderId = providerSelect.value;
+        const options = billSelect.querySelectorAll('option[data-provider]');
+
+        options.forEach(option => {
+            if (!selectedProviderId || option.dataset.provider === selectedProviderId) {
+                option.hidden = false;
+                option.disabled = false;
+            } else {
+                option.hidden = true;
+                option.disabled = true;
+            }
+        });
+
+        const currentBill = billSelect.querySelector('option[value="' + billSelect.value + '"]');
+        if (currentBill && currentBill.hidden) {
+            billSelect.value = '';
+            amountInput.value = '';
+        }
+    }
+
+    function autofillAmount() {
+        const selectedOption = billSelect.selectedOptions[0];
+        if (selectedOption && selectedOption.dataset.amount) {
+            amountInput.value = selectedOption.dataset.amount;
+        }
+    }
+
+    if (providerSelect && billSelect) {
+        providerSelect.addEventListener('change', () => {
+            updateBillOptions();
+            autofillAmount();
+        });
+
+        billSelect.addEventListener('change', autofillAmount);
+
+        updateBillOptions();
+    }
+</script>
+{% endblock %}

@@ -7,12 +7,13 @@ from .models import Client, Wallet, ClientAuth
 from .serializers import ChangePasswordserializer, ClientSerializer, WalletSerializer, WalletBalanceSerializer
 from django.contrib import messages
 from transfer.models import Transfer
+from django.db import transaction
 from django.db.models import Q, Sum
 from django.views.generic import View, TemplateView
-from .forms import ClientSignUpForm, ClientLoginForm, CreateWalletForm
+from .forms import ClientSignUpForm, ClientLoginForm, CreateWalletForm, ClientPaymentForm
 from django.contrib.auth import authenticate, login, logout
 from deposits.models import Deposit
-from paiement.models import Payment
+from paiement.models import ServiceProvider, Bill, Payment
 from django.contrib.auth.models import User
 
 DEFAULT_CLIENT_PASSWORD = '1m96po7'
@@ -183,6 +184,70 @@ class ClientTransferView(ClientPortalPageView):
         context['wallets'] = Wallet.objects.filter(client=client)
         context['all_wallets'] = Wallet.objects.exclude(client=client).select_related('client')
         return context
+
+
+class ClientPaymentView(ClientPortalPageView):
+    template_name = 'client/payment.html'
+    active_page = 'payment'
+    page_title = 'Pay Bill'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        client_id = self.request.session.get('client_id')
+        client = get_object_or_404(Client, id=client_id)
+        providers = ServiceProvider.objects.all()
+        unpaid_bills = Bill.objects.filter(is_paid=False).select_related('provider')
+
+        context['payment_form'] = ClientPaymentForm(providers=providers, bills=unpaid_bills)
+        context['providers'] = providers
+        context['bills'] = unpaid_bills
+        context['client_wallets'] = Wallet.objects.filter(client=client)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        client_id = self.request.session.get('client_id')
+        client = get_object_or_404(Client, id=client_id)
+        providers = ServiceProvider.objects.all()
+        unpaid_bills = Bill.objects.filter(is_paid=False).select_related('provider')
+        form = ClientPaymentForm(request.POST, providers=providers, bills=unpaid_bills)
+
+        if form.is_valid():
+            provider = form.cleaned_data['provider']
+            bill = form.cleaned_data['bill']
+            amount = form.cleaned_data['amount']
+
+            if bill.provider_id != provider.id:
+                form.add_error('bill', 'Please select a bill that belongs to the chosen provider.')
+
+            if bill.is_paid:
+                form.add_error('bill', 'This bill has already been paid.')
+
+            wallet = Wallet.objects.filter(client=client, balance__gte=amount).order_by('-balance').first()
+            if wallet is None:
+                form.add_error(None, 'No client wallet has enough balance to cover this payment.')
+
+            if not form.errors:
+                with transaction.atomic():
+                    wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
+                    if wallet.balance < amount:
+                        form.add_error(None, 'Insufficient wallet balance.')
+                    else:
+                        wallet.balance -= amount
+                        wallet.save(update_fields=['balance'])
+                        if amount >= bill.amount_due:
+                            bill.is_paid = True
+                            bill.save(update_fields=['is_paid'])
+                        Payment.objects.create(wallet=wallet, bill=bill, amount=amount)
+                        messages.success(request, 'Payment recorded successfully.')
+                        return redirect(reverse_lazy('client-payment'))
+
+        context = super().get_context_data(**kwargs)
+        context['payment_form'] = form
+        context['providers'] = providers
+        context['bills'] = unpaid_bills
+        context['client_wallets'] = Wallet.objects.filter(client=client)
+        return render(request, self.template_name, context)
+
 
 class ClientReportView(ClientPortalPageView):
     template_name = 'client/report.html' # or 'client/historique.html'
