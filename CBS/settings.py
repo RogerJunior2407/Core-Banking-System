@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'paiement',
     'historique',
     'rest_framework_simplejwt',
+    
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
