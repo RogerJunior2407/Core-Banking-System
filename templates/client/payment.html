@@ -26,9 +26,9 @@
             <div class="form-group">
                 <label for="provider-select">Service provider</label>
                 <select class="form-control" id="provider-select" name="provider" required>
-                    <option value="" disabled {% if not payment_form['provider'].value %}selected{% endif %}>Select provider...</option>
+                    <option value="" disabled {% if not payment_form.provider.value %}selected{% endif %}>Select provider...</option>
                     {% for provider in providers %}
-                        <option value="{{ provider.id }}" {% if payment_form['provider'].value|stringformat:'s' == provider.id|stringformat:'s' %}selected{% endif %}>
+                        <option value="{{ provider.id }}" {% if payment_form.provider.value|stringformat:'s' == provider.id|stringformat:'s' %}selected{% endif %}>
                             {{ provider.name }} ({{ provider.category }})
                         </option>
                     {% endfor %}
@@ -41,9 +41,9 @@
             <div class="form-group">
                 <label for="bill-select">Bill</label>
                 <select class="form-control" id="bill-select" name="bill" required>
-                    <option value="" disabled {% if not payment_form['bill'].value %}selected{% endif %}>Select bill...</option>
+                    <option value="" disabled {% if not payment_form.bill.value %}selected{% endif %}>Select bill...</option>
                     {% for bill in bills %}
-                        <option value="{{ bill.id }}" data-provider="{{ bill.provider_id }}" data-amount="{{ bill.amount_due }}" {% if payment_form['bill'].value|stringformat:'s' == bill.id|stringformat:'s' %}selected{% endif %}>
+                        <option value="{{ bill.id }}" data-provider="{{ bill.provider_id }}" data-amount="{{ bill.amount_due }}" {% if payment_form.bill.value|stringformat:'s' == bill.id|stringformat:'s' %}selected{% endif %}>
                             {{ bill.provider.name }} - {{ bill.reference_number }} ({{ bill.amount_due }})
                         </option>
                     {% endfor %}
@@ -63,7 +63,7 @@
                     step="0.01" 
                     min="0.01" 
                     placeholder="Enter amount" 
-                    value="{{ payment_form['amount'].value|default_if_none:'' }}" 
+                    value="{{ payment_form.amount.value|default_if_none:'' }}" 
                     required
                 />
                 {% if payment_form.errors.amount %}
