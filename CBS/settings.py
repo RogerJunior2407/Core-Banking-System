@@ -91,6 +91,9 @@ WSGI_APPLICATION = 'CBS.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 import dj_database_url
+
+ON_RENDER = os.environ.get('RENDER') == 'true'
+
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
@@ -101,15 +104,16 @@ if DATABASE_URL:
             conn_health_checks=True,
         )
     }
+elif ON_RENDER:
+    raise ValueError("DATABASE_URL environment variable is missing on Render!")
 else:
-    # Local development fallback
+    # Local development only
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
