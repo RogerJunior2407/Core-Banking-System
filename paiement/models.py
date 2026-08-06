@@ -1,5 +1,5 @@
 from django.db import models
-from bank.models import Wallet
+from bank.models import Client, Wallet
 
 
 class ServiceProvider(models.Model):
@@ -18,6 +18,7 @@ class ServiceProvider(models.Model):
 
 
 class Bill(models.Model):
+    client = models.ForeignKey(Client, related_name='bills', on_delete=models.PROTECT)
     provider = models.ForeignKey(ServiceProvider, related_name='bills', on_delete=models.PROTECT)
     reference_number = models.CharField(max_length=100)
     amount_due = models.DecimalField(max_digits=18, decimal_places=2)

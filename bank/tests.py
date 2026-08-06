@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from bank.models import Client, ClientAuth, Wallet
+from paiement.models import Bill, ServiceProvider
 
 
 class ClientLoginTests(TestCase):
@@ -42,3 +43,20 @@ class ClientLoginTests(TestCase):
 
         self.assertRedirects(response, reverse('client-dashboard'))
         self.assertEqual(Wallet.objects.filter(client=client).count(), 1)
+
+    def test_client_payment_page_only_shows_bills_assigned_to_that_client(self):
+        owner = Client.objects.create(name='Alice', phone='111111111', age=30, adress='Paris')
+        other = Client.objects.create(name='Bob', phone='222222222', age=31, adress='Lyon')
+        provider = ServiceProvider.objects.create(name='Electricity', category='ELECTRICITY')
+        Bill.objects.create(client=owner, provider=provider, reference_number='REF-001', amount_due='100.00')
+        Bill.objects.create(client=other, provider=provider, reference_number='REF-002', amount_due='250.00')
+
+        session = self.client.session
+        session['client_id'] = str(owner.id)
+        session.save()
+
+        response = self.client.get(reverse('client-payment'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'REF-001')
+        self.assertNotContains(response, 'REF-002')

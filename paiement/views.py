@@ -12,10 +12,20 @@ class ServiceProviderViewSet(generics.ListCreateAPIView):
 
 
 class BillListCreateView(generics.ListCreateAPIView):
-    queryset = Bill.objects.select_related('provider').all()
     serializer_class = BillSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['provider', 'is_paid']
+
+    def get_queryset(self):
+        queryset = Bill.objects.select_related('provider').all()
+        if self.request.session.get('admin_authenticated'):
+            return queryset
+
+        client_id = self.request.session.get('client_id')
+        if client_id:
+            return queryset.filter(client_id=client_id)
+
+        return queryset.none()
 
 
 

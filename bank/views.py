@@ -196,7 +196,7 @@ class ClientPaymentView(ClientPortalPageView):
         client_id = self.request.session.get('client_id')
         client = get_object_or_404(Client, id=client_id)
         providers = ServiceProvider.objects.all()
-        unpaid_bills = Bill.objects.filter(is_paid=False).select_related('provider')
+        unpaid_bills = Bill.objects.filter(is_paid=False, client=client).select_related('provider')
 
         context['payment_form'] = ClientPaymentForm(providers=providers, bills=unpaid_bills)
         context['providers'] = providers
@@ -208,7 +208,7 @@ class ClientPaymentView(ClientPortalPageView):
         client_id = self.request.session.get('client_id')
         client = get_object_or_404(Client, id=client_id)
         providers = ServiceProvider.objects.all()
-        unpaid_bills = Bill.objects.filter(is_paid=False).select_related('provider')
+        unpaid_bills = Bill.objects.filter(is_paid=False, client=client).select_related('provider')
         form = ClientPaymentForm(request.POST, providers=providers, bills=unpaid_bills)
 
         if form.is_valid():
@@ -439,7 +439,6 @@ class ClientAuthView(View):
         return render(request, self.template_name, {
             'signup_form': ClientSignUpForm(),
             'active_tab': 'login',
-            'already_logged_in': 'client_id' in request.session,
         })
 
     def post(self, request):

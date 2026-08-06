@@ -899,6 +899,12 @@
                                 <option value="" disabled selected>Select provider...</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="bill-client-select">Client</label>
+                            <select id="bill-client-select" class="form-control" required>
+                                <option value="" disabled selected>Select client...</option>
+                            </select>
+                        </div>
                         <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                             <div>
                                 <label for="bill-ref">Bill Ref</label>
@@ -1525,6 +1531,19 @@
                 }
             }
 
+            // Bill clients select
+            const billClientDD = document.getElementById('bill-client-select');
+            if (billClientDD) {
+                const saved = billClientDD.value;
+                billClientDD.innerHTML = `<option value="" disabled selected>Select client...</option>`;
+                state.clients.forEach(c => {
+                    billClientDD.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+                });
+                if (saved && Array.from(billClientDD.options).some(o => o.value === saved)) {
+                    billClientDD.value = saved;
+                }
+            }
+
             // Bills select (unpaid)
             const billDD = document.getElementById('payment-bill-select');
             if (billDD) {
@@ -1739,12 +1758,13 @@
         async function handleCreateBill(event) {
             event.preventDefault();
             const providerId = parseInt(document.getElementById('bill-provider-select').value);
+            const clientId = document.getElementById('bill-client-select').value;
             const ref = document.getElementById('bill-ref').value.trim();
             const amount = parseFloat(document.getElementById('bill-amount').value);
             try {
                 await fetchJSON(API.bills, {
                     method: 'POST',
-                    body: JSON.stringify({ provider: providerId, reference_number: ref, amount_due: amount })
+                    body: JSON.stringify({ client: clientId, provider: providerId, reference_number: ref, amount_due: amount })
                 });
                 document.getElementById('create-bill-form').reset();
                 await refreshAllData();
