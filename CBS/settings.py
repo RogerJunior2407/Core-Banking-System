@@ -102,7 +102,7 @@ if DATABASE_URL:
         )
     }
 else:
-    # Local fallback for your computer only
+    
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
