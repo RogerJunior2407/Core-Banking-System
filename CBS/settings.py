@@ -170,5 +170,15 @@ print(f"ACTIVE DATABASE ENGINE: {DATABASES['default']['ENGINE']}")
 print(f"DATABASE NAME/HOST: {DATABASES['default'].get('HOST') or DATABASES['default'].get('NAME')}")
 print("=========================================")
 
+from django.db.models.signals import post_migrate
+from django.dispatch import receiver
 
+@receiver(post_migrate)
+def create_default_superuser(sender, **kwargs):
+    if sender.name == 'django.contrib.auth':
+        from django.contrib.auth import get_user_model
 
+        User = get_user_model()
+        if not User.objects.filter(username='admin').exists():
+            User.objects.create_superuser('admin', 'admin@example.com', 'YourStrongPassword123')
+            print('--- Default superuser "admin" created successfully ---')
