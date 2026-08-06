@@ -60,3 +60,23 @@ class ClientLoginTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'REF-001')
         self.assertNotContains(response, 'REF-002')
+
+    def test_client_cannot_submit_payment_for_another_clients_bill(self):
+        owner = Client.objects.create(name='Alice', phone='111111111', age=30, adress='Paris')
+        other = Client.objects.create(name='Bob', phone='222222222', age=31, adress='Lyon')
+        provider = ServiceProvider.objects.create(name='Electricity', category='ELECTRICITY')
+        bill = Bill.objects.create(client=other, provider=provider, reference_number='REF-002', amount_due='250.00')
+        wallet = Wallet.objects.create(client=owner, balance=500.00, currency='USD')
+
+        session = self.client.session
+        session['client_id'] = str(owner.id)
+        session.save()
+
+        response = self.client.post(reverse('client-payment'), {
+            'provider': provider.id,
+            'bill': bill.id,
+            'amount': '250.00'
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('bill', response.context['payment_form'].errors)

@@ -216,7 +216,9 @@ class ClientPaymentView(ClientPortalPageView):
             bill = form.cleaned_data['bill']
             amount = form.cleaned_data['amount']
 
-            if bill.provider_id != provider.id:
+            if bill.client_id != client.id:
+                form.add_error('bill', 'Please select a bill that belongs to your account.')
+            elif bill.provider_id != provider.id:
                 form.add_error('bill', 'Please select a bill that belongs to the chosen provider.')
 
             if bill.is_paid:
@@ -436,6 +438,9 @@ class ClientAuthView(View):
         return client
 
     def get(self, request):
+        if request.session.get('client_id'):
+            return redirect('client-dashboard')
+
         return render(request, self.template_name, {
             'signup_form': ClientSignUpForm(),
             'active_tab': 'login',
