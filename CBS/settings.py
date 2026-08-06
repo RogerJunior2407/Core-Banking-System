@@ -181,4 +181,4 @@ def create_default_superuser(sender, **kwargs):
         User = get_user_model()
         if not User.objects.filter(username='admin').exists():
             User.objects.create_superuser('admin', 'admin@example.com', 'YourStrongPassword123')
-            print('--- Default superuser "admin" created successfully ---')
+            print('---- Default superuser "admin" created successfully ----') 
