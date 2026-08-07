@@ -2,6 +2,15 @@ from django.db import models
 from bank.models import Client, Wallet
 
 
+CURRENCY_CHOICES = [
+    ('USD', 'USD'),
+    ('EUR', 'EUR'),
+    ('GBP', 'GBP'),
+    ('MAD', 'MAD'),
+    ('FBI', 'FBI'),
+]
+
+
 class ServiceProvider(models.Model):
     CATEGORY_CHOICES = [
         ('ELECTRICITY', 'Électricité'),
@@ -22,10 +31,11 @@ class Bill(models.Model):
     provider = models.ForeignKey(ServiceProvider, related_name='bills', on_delete=models.PROTECT)
     reference_number = models.CharField(max_length=100)
     amount_due = models.DecimalField(max_digits=18, decimal_places=2)
+    currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='USD')
     is_paid = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.provider} - {self.reference_number}"
+        return f"{self.provider} - {self.reference_number} ({self.currency})"
 
 
 class Payment(models.Model):

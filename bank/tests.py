@@ -80,3 +80,18 @@ class ClientLoginTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('bill', response.context['payment_form'].errors)
+
+    def test_bill_currency_is_saved_for_admin_reporting(self):
+        owner = Client.objects.create(name='Alice', phone='333333333', age=30, adress='Paris')
+        provider = ServiceProvider.objects.create(name='Water', category='WATER')
+
+        bill = Bill.objects.create(
+            client=owner,
+            provider=provider,
+            reference_number='REF-003',
+            amount_due='75.50',
+            currency='EUR',
+        )
+
+        self.assertEqual(bill.currency, 'EUR')
+        self.assertIn('EUR', str(bill))
