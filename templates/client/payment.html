@@ -44,7 +44,7 @@
                     <option value="" disabled {% if not payment_form.bill.value %}selected{% endif %}>Select bill...</option>
                     {% for bill in bills %}
                         <option value="{{ bill.id }}" data-provider="{{ bill.provider_id }}" data-amount="{{ bill.amount_due }}" {% if payment_form.bill.value|stringformat:'s' == bill.id|stringformat:'s' %}selected{% endif %}>
-                            {{ bill.provider.name }} - {{ bill.reference_number }} ({{ bill.amount_due }})
+                            {{ bill.provider.name }} - {{ bill.reference_number }} ({{ bill.amount_due }} {{ bill.currency|default:'USD' }})
                         </option>
                     {% endfor %}
                 </select>
@@ -91,6 +91,7 @@
                     <th>Provider</th>
                     <th>Reference</th>
                     <th>Amount</th>
+                    <th>Currency</th>
                 </tr>
             </thead>
             <tbody>
@@ -100,11 +101,12 @@
                             <td>{{ bill.provider.name }}</td>
                             <td>{{ bill.reference_number }}</td>
                             <td>{{ bill.amount_due }}</td>
+                            <td>{{ bill.currency|default:'USD' }}</td>
                         </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="3">No unpaid bills.</td>
+                        <td colspan="4">No unpaid bills.</td>
                     </tr>
                 {% endif %}
             </tbody>
