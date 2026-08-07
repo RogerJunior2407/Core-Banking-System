@@ -61,6 +61,22 @@ class ClientLoginTests(TestCase):
         self.assertContains(response, 'REF-001')
         self.assertNotContains(response, 'REF-002')
 
+    def test_client_payment_page_only_shows_providers_for_their_bills(self):
+        owner = Client.objects.create(name='Alice', phone='111111111', age=30, adress='Paris')
+        provider_with_bill = ServiceProvider.objects.create(name='Electricity', category='ELECTRICITY')
+        provider_without_bill = ServiceProvider.objects.create(name='Internet', category='INTERNET')
+        Bill.objects.create(client=owner, provider=provider_with_bill, reference_number='REF-001', amount_due='100.00')
+
+        session = self.client.session
+        session['client_id'] = str(owner.id)
+        session.save()
+
+        response = self.client.get(reverse('client-payment'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Electricity')
+        self.assertNotContains(response, 'Internet')
+
     def test_client_cannot_submit_payment_for_another_clients_bill(self):
         owner = Client.objects.create(name='Alice', phone='111111111', age=30, adress='Paris')
         other = Client.objects.create(name='Bob', phone='222222222', age=31, adress='Lyon')

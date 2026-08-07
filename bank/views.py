@@ -195,8 +195,8 @@ class ClientPaymentView(ClientPortalPageView):
         context = super().get_context_data(**kwargs)
         client_id = self.request.session.get('client_id')
         client = get_object_or_404(Client, id=client_id)
-        providers = ServiceProvider.objects.all()
         unpaid_bills = Bill.objects.filter(is_paid=False, client=client).select_related('provider')
+        providers = ServiceProvider.objects.filter(bills__in=unpaid_bills).distinct()
 
         context['payment_form'] = ClientPaymentForm(providers=providers, bills=unpaid_bills)
         context['providers'] = providers
@@ -207,8 +207,8 @@ class ClientPaymentView(ClientPortalPageView):
     def post(self, request, *args, **kwargs):
         client_id = self.request.session.get('client_id')
         client = get_object_or_404(Client, id=client_id)
-        providers = ServiceProvider.objects.all()
         unpaid_bills = Bill.objects.filter(is_paid=False, client=client).select_related('provider')
+        providers = ServiceProvider.objects.filter(bills__in=unpaid_bills).distinct()
         form = ClientPaymentForm(request.POST, providers=providers, bills=unpaid_bills)
 
         if form.is_valid():
