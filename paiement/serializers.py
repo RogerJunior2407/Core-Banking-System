@@ -11,7 +11,7 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
 class BillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bill
-        fields = ['id', 'client', 'provider', 'reference_number', 'amount_due', 'is_paid']
+        fields = ['id', 'client', 'provider', 'reference_number', 'amount_due', 'currency', 'is_paid']
         read_only_fields = ['id', 'is_paid']
 
 

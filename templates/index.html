@@ -915,6 +915,16 @@
                                 <input type="number" id="bill-amount" class="form-control" placeholder="0.00" step="0.01" min="0.01" required>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label for="bill-currency">Currency</label>
+                            <select id="bill-currency" class="form-control" required>
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="MAD">MAD</option>
+                                <option value="FBI">FBI</option>
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-primary">Generate</button>
                         <p id="bill-form-message" class="form-feedback-message" role="alert"></p>
                     </form>
@@ -959,12 +969,13 @@
                                         <th>Provider</th>
                                         <th>Ref Number</th>
                                         <th>Amount</th>
+                                        <th>Currency</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="bills-list-body">
                                     <tr>
-                                        <td colspan="4" class="empty-state">No bills found.</td>
+                                        <td colspan="5" class="empty-state">No bills found.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1439,10 +1450,12 @@
                         : `<span class="badge badge-warning">Unpaid</span>`;
                     const provider = getProviderName(b.provider);
                     const row = document.createElement('tr');
+                    const currency = (b.currency || 'USD').toUpperCase();
                     row.innerHTML = `
                         <td>${provider}</td>
                         <td>${b.reference_number}</td>
                         <td>${parseFloat(b.amount_due).toFixed(2)}</td>
+                        <td>${currency}</td>
                         <td>${status}</td>
                     `;
                     billsBody.appendChild(row);
@@ -1552,7 +1565,8 @@
                 const unpaid = state.bills.filter(b => !b.is_paid);
                 unpaid.forEach(b => {
                     const providerName = getProviderName(b.provider);
-                    billDD.innerHTML += `<option value="${b.id}">${providerName} — ${b.reference_number} (${parseFloat(b.amount_due).toFixed(2)})</option>`;
+                    const currency = (b.currency || 'USD').toUpperCase();
+                    billDD.innerHTML += `<option value="${b.id}">${providerName} — ${b.reference_number} (${parseFloat(b.amount_due).toFixed(2)} ${currency})</option>`;
                 });
                 if (saved && Array.from(billDD.options).some(o => o.value === saved)) {
                     billDD.value = saved;
@@ -1761,10 +1775,11 @@
             const clientId = document.getElementById('bill-client-select').value;
             const ref = document.getElementById('bill-ref').value.trim();
             const amount = parseFloat(document.getElementById('bill-amount').value);
+            const currency = document.getElementById('bill-currency').value.toUpperCase();
             try {
                 await fetchJSON(API.bills, {
                     method: 'POST',
-                    body: JSON.stringify({ client: clientId, provider: providerId, reference_number: ref, amount_due: amount })
+                    body: JSON.stringify({ client: clientId, provider: providerId, reference_number: ref, amount_due: amount, currency })
                 });
                 document.getElementById('create-bill-form').reset();
                 await refreshAllData();
