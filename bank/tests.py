@@ -17,7 +17,7 @@ class ClientLoginTests(TestCase):
             'password': 'secret123',
         }, follow=True)
 
-        self.assertRedirects(response, reverse('client-dashboard'))
+        self.assertRedirects(response, reverse('client-dashboard-by-id', args=[client.id]))
         self.assertTemplateUsed(response, 'client/client.html')
         self.assertEqual(self.client.session['client_id'], str(client.id))
         self.assertTrue(self.client.session.get_expire_at_browser_close())
@@ -33,7 +33,7 @@ class ClientLoginTests(TestCase):
             'password': 'password456',
         }, follow=True)
 
-        self.assertRedirects(response, reverse('client-dashboard'))
+        self.assertRedirects(response, reverse('client-dashboard-by-id', args=[client.id]))
         self.assertTrue(self.client.session.get_expire_at_browser_close())
 
     def test_login_page_shows_signup_form_before_dashboard_access(self):
@@ -56,8 +56,25 @@ class ClientLoginTests(TestCase):
         self.assertEqual(Wallet.objects.filter(client=client).count(), 0)
         response = self.client.post(reverse('create-wallet'), follow=True)
 
-        self.assertRedirects(response, reverse('client-dashboard'))
+        self.assertRedirects(response, reverse('client-dashboard-by-id', args=[client.id]))
         self.assertEqual(Wallet.objects.filter(client=client).count(), 1)
+
+    def test_create_wallet_uses_the_client_from_the_active_page_not_shared_session(self):
+        owner = Client.objects.create(name='Dana', phone='777777777', age=38, adress='Lille')
+        other = Client.objects.create(name='Evan', phone='888888888', age=41, adress='Toulouse')
+
+        session = self.client.session
+        session['client_id'] = str(other.id)
+        session.save()
+
+        response = self.client.post(reverse('create-wallet'), {
+            'client_id': str(owner.id),
+            'currency': 'USD',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Wallet.objects.filter(client=owner).count(), 1)
+        self.assertEqual(Wallet.objects.filter(client=other).count(), 0)
 
     def test_client_payment_page_only_shows_bills_assigned_to_that_client(self):
         owner = Client.objects.create(name='Alice', phone='111111111', age=30, adress='Paris')

@@ -2,6 +2,7 @@ from django.views.generic import TemplateView, FormView
 from django.shortcuts import redirect, get_object_or_404, render
 from django.urls import reverse_lazy
 from django import forms
+from django.http import Http404
 from rest_framework import generics, viewsets 
 from .models import Client, Wallet, ClientAuth
 from .serializers import ChangePasswordserializer, ClientSerializer, WalletSerializer, WalletBalanceSerializer
@@ -29,9 +30,18 @@ class ClientPortalPageView(TemplateView):
         # Explicitly return template_name so Django doesn't construct 'client/dashboard.html'
         return [self.template_name]
 
+    def get_client_id(self):
+        return self.kwargs.get('client_id') or self.request.POST.get('client_id') or self.request.GET.get('client_id') or self.request.session.get('client_id')
+
+    def get_client(self):
+        client_id = self.get_client_id()
+        if not client_id:
+            return None
+        return get_object_or_404(Client, id=client_id)
+
     def dispatch(self, request, *args, **kwargs):
         if getattr(self, 'require_login', True):
-            client_id = kwargs.get('client_id') or request.session.get('client_id')
+            client_id = self.get_client_id()
             if not client_id:
                 return redirect(reverse_lazy('client-login'))
             request.session['client_id'] = str(client_id)
@@ -40,8 +50,9 @@ class ClientPortalPageView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        client_id = self.kwargs.get('client_id') or self.request.session.get('client_id')
-        client = get_object_or_404(Client, id=client_id)
+        client = self.get_client()
+        if client is None:
+            return context
         context['active_page'] = self.active_page
         context['page_title'] = self.page_title
         context['wallet_form'] = CreateWalletForm()
@@ -60,17 +71,13 @@ class ClientDashboardView(ClientPortalPageView):
     page_title = 'Dashboard'
 
     def dispatch(self, request, *args, **kwargs):
-        client_id = kwargs.get('client_id') or request.session.get('client_id')
-        if not client_id:
-            return redirect('client-login')
-        request.session['client_id'] = str(client_id)
-        request.session.modified = True
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        client_id = self.request.session.get('client_id')
-        client = get_object_or_404(Client, id=client_id)
+        client = self.get_client()
+        if client is None:
+            return context
         wallets = Wallet.objects.filter(client=client)
 
         # 1. Total balance calculation
@@ -123,8 +130,9 @@ class ClientWalletView(ClientPortalPageView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        client_id = self.request.session.get('client_id')
-        client = get_object_or_404(Client, id=client_id)
+        client = self.get_client()
+        if client is None:
+            return context
         wallets = Wallet.objects.filter(client=client)
         wallet_totals = wallets.values('currency').annotate(total=Sum('balance'))
 
@@ -173,8 +181,9 @@ class ClientDepositView(ClientPortalPageView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        client_id = self.request.session.get('client_id')
-        client = get_object_or_404(Client, id=client_id)
+        client = self.get_client()
+        if client is None:
+            return context
         context['wallets'] = Wallet.objects.filter(client=client)
         return context
 
@@ -187,8 +196,9 @@ class ClientTransferView(ClientPortalPageView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        client_id = self.request.session.get('client_id')
-        client = get_object_or_404(Client, id=client_id)
+        client = self.get_client()
+        if client is None:
+            return context
         context['wallets'] = Wallet.objects.filter(client=client)
         context['all_wallets'] = Wallet.objects.exclude(client=client).select_related('client')
         return context
@@ -201,8 +211,9 @@ class ClientPaymentView(ClientPortalPageView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        client_id = self.request.session.get('client_id')
-        client = get_object_or_404(Client, id=client_id)
+        client = self.get_client()
+        if client is None:
+            return context
         unpaid_bills = Bill.objects.filter(client=client, is_paid=False).select_related('provider')
         providers = ServiceProvider.objects.filter(bills__in=unpaid_bills).distinct()
 
@@ -213,8 +224,9 @@ class ClientPaymentView(ClientPortalPageView):
         return context
 
     def post(self, request, *args, **kwargs):
-        client_id = self.request.session.get('client_id')
-        client = get_object_or_404(Client, id=client_id)
+        client = self.get_client()
+        if client is None:
+            return redirect(reverse_lazy('client-login'))
         unpaid_bills = Bill.objects.filter(client=client, is_paid=False).select_related('provider')
         providers = ServiceProvider.objects.filter(bills__in=unpaid_bills).distinct()
         form = ClientPaymentForm(request.POST, providers=providers, bills=unpaid_bills)
@@ -251,7 +263,7 @@ class ClientPaymentView(ClientPortalPageView):
                         bill.is_paid = bill.remaining_amount <= 0
                         bill.save(update_fields=['is_paid'])
                         messages.success(request, 'Payment recorded successfully.')
-                        return redirect(reverse_lazy('client-payment'))
+                        return redirect('client-payment-by-id', client_id=client.id)
 
         context = super().get_context_data(**kwargs)
         context['payment_form'] = form
@@ -268,10 +280,9 @@ class ClientReportView(ClientPortalPageView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        client_id = self.request.session.get('client_id')
+        client = self.get_client()
         
-        if client_id:
-            client = get_object_or_404(Client, id=client_id)
+        if client:
             client_wallets = Wallet.objects.filter(client=client)
             
             # 1. Fetch all transfers involving the client's wallets
@@ -412,7 +423,9 @@ class ChangePasswordView(generics.UpdateAPIView):
     serializer_class = ChangePasswordserializer
 
     def get_object(self):
-        client_id = self.request.session.get('client_id')
+        client_id = self.kwargs.get('client_id') or self.request.POST.get('client_id') or self.request.session.get('client_id')
+        if not client_id:
+            raise Http404
         client = get_object_or_404(Client, id=client_id)
         return client.auth
     
@@ -449,7 +462,7 @@ class ClientAuthView(View):
 
     def get(self, request):
         if request.session.get('client_id'):
-            return redirect('client-dashboard')
+            return redirect('client-dashboard-by-id', client_id=request.session['client_id'])
 
         return render(request, self.template_name, {
             'signup_form': ClientSignUpForm(),
@@ -486,7 +499,7 @@ class ClientAuthView(View):
                 request.session.flush()
                 request.session['client_id'] = str(client.id)
                 request.session.set_expiry(0)
-                return redirect('client-dashboard')
+                return redirect('client-dashboard-by-id', client_id=client.id)
 
             return render(request, self.template_name, {
                 'signup_form': signup_form,
@@ -508,7 +521,7 @@ class ClientAuthView(View):
                     if not client.wallets.exists():
                         Wallet.objects.create(client=client, balance=0.00, currency='USD')
 
-                    return redirect('client-dashboard')
+                    return redirect('client-dashboard-by-id', client_id=client.id)
 
             return render(request, self.template_name, {
                 'signup_form': ClientSignUpForm(),
@@ -522,7 +535,7 @@ class ClientAuthView(View):
 
 class CreateWalletView(View):
     def post(self, request):
-        client_id = request.session.get('client_id')
+        client_id = request.POST.get('client_id') or request.session.get('client_id')
         if not client_id:
             return redirect('client-login')
 
@@ -534,7 +547,7 @@ class CreateWalletView(View):
 
         Wallet.objects.create(client=client, balance=0.00, currency=currency)
         messages.success(request, f'New wallet created in {currency}.')
-        return redirect('client-dashboard')
+        return redirect('client-dashboard-by-id', client_id=client.id)
 
 
 def logout_view(request):

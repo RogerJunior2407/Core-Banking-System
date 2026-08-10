@@ -278,6 +278,7 @@
                 </div>
                 <form action="{% url 'create-wallet' %}" method="POST" class="wallet-create-form">
                     {% csrf_token %}
+                    <input type="hidden" name="client_id" value="{{ client.id }}">
                     {{ wallet_form.currency }}
                     <button type="submit" class="btn btn-primary">+ New Wallet</button>
                 </form>

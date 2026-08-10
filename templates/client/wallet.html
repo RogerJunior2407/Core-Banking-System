@@ -9,6 +9,7 @@
     </div>
     <form action="{% url 'create-wallet' %}" method="POST" style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
         {% csrf_token %}
+        <input type="hidden" name="client_id" value="{{ client.id }}">
         {{ wallet_form.currency }}
         <button type="submit" class="btn btn-primary">Create wallet</button>
     </form>
