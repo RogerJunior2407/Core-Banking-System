@@ -1,4 +1,8 @@
+from decimal import Decimal
+
 from django.db import models
+from django.db.models import Sum
+
 from bank.models import Client, Wallet
 
 
@@ -33,6 +37,16 @@ class Bill(models.Model):
     amount_due = models.DecimalField(max_digits=18, decimal_places=2)
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='USD')
     is_paid = models.BooleanField(default=False)
+
+    @property
+    def total_paid(self):
+        total = self.payments.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        return total
+
+    @property
+    def remaining_amount(self):
+        amount_due = self.amount_due if isinstance(self.amount_due, Decimal) else Decimal(str(self.amount_due))
+        return max(amount_due - self.total_paid, Decimal('0.00'))
 
     def __str__(self):
         return f"{self.provider} - {self.reference_number} ({self.currency})"

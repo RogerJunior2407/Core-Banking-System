@@ -195,7 +195,7 @@ class ClientPaymentView(ClientPortalPageView):
         context = super().get_context_data(**kwargs)
         client_id = self.request.session.get('client_id')
         client = get_object_or_404(Client, id=client_id)
-        unpaid_bills = Bill.objects.filter(is_paid=False, client=client).select_related('provider')
+        unpaid_bills = Bill.objects.filter(client=client, is_paid=False).select_related('provider')
         providers = ServiceProvider.objects.filter(bills__in=unpaid_bills).distinct()
 
         context['payment_form'] = ClientPaymentForm(providers=providers, bills=unpaid_bills)
@@ -207,7 +207,7 @@ class ClientPaymentView(ClientPortalPageView):
     def post(self, request, *args, **kwargs):
         client_id = self.request.session.get('client_id')
         client = get_object_or_404(Client, id=client_id)
-        unpaid_bills = Bill.objects.filter(is_paid=False, client=client).select_related('provider')
+        unpaid_bills = Bill.objects.filter(client=client, is_paid=False).select_related('provider')
         providers = ServiceProvider.objects.filter(bills__in=unpaid_bills).distinct()
         form = ClientPaymentForm(request.POST, providers=providers, bills=unpaid_bills)
 
@@ -221,8 +221,10 @@ class ClientPaymentView(ClientPortalPageView):
             elif bill.provider_id != provider.id:
                 form.add_error('bill', 'Please select a bill that belongs to the chosen provider.')
 
-            if bill.is_paid:
+            if bill.remaining_amount <= 0:
                 form.add_error('bill', 'This bill has already been paid.')
+            elif amount > bill.remaining_amount:
+                form.add_error('amount', 'Payment amount cannot exceed the remaining amount to pay.')
 
             wallet = Wallet.objects.filter(client=client, balance__gte=amount).order_by('-balance').first()
             if wallet is None:
@@ -236,10 +238,10 @@ class ClientPaymentView(ClientPortalPageView):
                     else:
                         wallet.balance -= amount
                         wallet.save(update_fields=['balance'])
-                        if amount >= bill.amount_due:
-                            bill.is_paid = True
-                            bill.save(update_fields=['is_paid'])
                         Payment.objects.create(wallet=wallet, bill=bill, amount=amount)
+                        bill.refresh_from_db()
+                        bill.is_paid = bill.remaining_amount <= 0
+                        bill.save(update_fields=['is_paid'])
                         messages.success(request, 'Payment recorded successfully.')
                         return redirect(reverse_lazy('client-payment'))
 

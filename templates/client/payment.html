@@ -43,8 +43,8 @@
                 <select class="form-control" id="bill-select" name="bill" required>
                     <option value="" disabled {% if not payment_form.bill.value %}selected{% endif %}>Select bill...</option>
                     {% for bill in bills %}
-                        <option value="{{ bill.id }}" data-provider="{{ bill.provider_id }}" data-amount="{{ bill.amount_due }}" {% if payment_form.bill.value|stringformat:'s' == bill.id|stringformat:'s' %}selected{% endif %}>
-                            {{ bill.provider.name }} - {{ bill.reference_number }} ({{ bill.amount_due }} {{ bill.currency|default:'USD' }})
+                        <option value="{{ bill.id }}" data-provider="{{ bill.provider_id }}" data-amount="{{ bill.remaining_amount }}" {% if payment_form.bill.value|stringformat:'s' == bill.id|stringformat:'s' %}selected{% endif %}>
+                            {{ bill.provider.name }} - {{ bill.reference_number }} (remaining {{ bill.remaining_amount }} {{ bill.currency|default:'USD' }})
                         </option>
                     {% endfor %}
                 </select>
@@ -55,6 +55,7 @@
 
             <div class="form-group">
                 <label for="payment-amount">Amount</label>
+                <p id="remaining-balance-help" class="empty-state">Select a bill to see the remaining amount to pay.</p>
                 <input 
                     class="form-control" 
                     id="payment-amount" 
@@ -90,7 +91,8 @@
                 <tr>
                     <th>Provider</th>
                     <th>Reference</th>
-                    <th>Amount</th>
+                    <th>Amount due</th>
+                    <th>Remaining to pay</th>
                     <th>Currency</th>
                 </tr>
             </thead>
@@ -101,12 +103,13 @@
                             <td>{{ bill.provider.name }}</td>
                             <td>{{ bill.reference_number }}</td>
                             <td>{{ bill.amount_due }}</td>
+                            <td>{{ bill.remaining_amount }}</td>
                             <td>{{ bill.currency|default:'USD' }}</td>
                         </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="4">No unpaid bills.</td>
+                        <td colspan="5">No unpaid bills.</td>
                     </tr>
                 {% endif %}
             </tbody>
@@ -120,6 +123,7 @@
     const providerSelect = document.getElementById('provider-select');
     const billSelect = document.getElementById('bill-select');
     const amountInput = document.getElementById('payment-amount');
+    const remainingBalanceHelp = document.getElementById('remaining-balance-help');
 
     function updateBillOptions() {
         const selectedProviderId = providerSelect.value;
@@ -146,6 +150,11 @@
         const selectedOption = billSelect.selectedOptions[0];
         if (selectedOption && selectedOption.dataset.amount) {
             amountInput.value = selectedOption.dataset.amount;
+            if (remainingBalanceHelp) {
+                remainingBalanceHelp.textContent = `Remaining to pay: ${selectedOption.dataset.amount}`;
+            }
+        } else if (remainingBalanceHelp) {
+            remainingBalanceHelp.textContent = 'Select a bill to see the remaining amount to pay.';
         }
     }
 

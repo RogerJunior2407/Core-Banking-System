@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from bank.models import Client, ClientAuth, Wallet
-from paiement.models import Bill, ServiceProvider
+from paiement.models import Bill, Payment, ServiceProvider
 
 
 class ClientLoginTests(TestCase):
@@ -126,3 +126,27 @@ class ClientLoginTests(TestCase):
 
         self.assertEqual(bill.currency, 'EUR')
         self.assertIn('EUR', str(bill))
+
+    def test_bill_remaining_amount_is_calculated_from_payments(self):
+        owner = Client.objects.create(name='Alice', phone='444444444', age=32, adress='Paris')
+        provider = ServiceProvider.objects.create(name='Internet', category='INTERNET')
+        bill = Bill.objects.create(client=owner, provider=provider, reference_number='REF-004', amount_due='100.00')
+
+        Payment.objects.create(bill=bill, wallet=Wallet.objects.create(client=owner, balance=1000.00, currency='USD'), amount='40.00')
+
+        self.assertEqual(bill.remaining_amount, 60.00)
+
+    def test_client_payment_page_displays_remaining_amount_to_pay(self):
+        owner = Client.objects.create(name='Alice', phone='555555555', age=34, adress='Paris')
+        provider = ServiceProvider.objects.create(name='Electricity', category='ELECTRICITY')
+        bill = Bill.objects.create(client=owner, provider=provider, reference_number='REF-005', amount_due='100.00')
+
+        session = self.client.session
+        session['client_id'] = str(owner.id)
+        session.save()
+
+        response = self.client.get(reverse('client-payment'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Remaining to pay')
+        self.assertContains(response, '100.00')

@@ -50,7 +50,9 @@ class PaymentListCreateView(generics.ListCreateAPIView):
             wallet.balance -= amount
             wallet.save(update_fields=['balance'])
 
-            bill.is_paid = True
+            payment = serializer.save()
+            bill.refresh_from_db()
+            bill.is_paid = bill.remaining_amount <= 0
             bill.save(update_fields=['is_paid'])
 
-            serializer.save()
+            return payment

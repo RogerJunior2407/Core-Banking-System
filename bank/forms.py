@@ -103,4 +103,8 @@ class ClientPaymentForm(forms.Form):
         if providers is not None:
             self.fields['provider'].queryset = providers
         if bills is not None:
-            self.fields['bill'].queryset = bills
+            if isinstance(bills, (list, tuple)):
+                bill_ids = [bill.pk for bill in bills]
+                self.fields['bill'].queryset = Bill.objects.filter(pk__in=bill_ids)
+            else:
+                self.fields['bill'].queryset = bills
