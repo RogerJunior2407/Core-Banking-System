@@ -20,6 +20,21 @@ class ClientLoginTests(TestCase):
         self.assertRedirects(response, reverse('client-dashboard'))
         self.assertTemplateUsed(response, 'client/client.html')
         self.assertEqual(self.client.session['client_id'], str(client.id))
+        self.assertTrue(self.client.session.get_expire_at_browser_close())
+
+    def test_login_sets_session_to_expire_on_browser_close(self):
+        client = Client.objects.create(name='Bob', phone='987654321', age=26, adress='Lyon')
+        auth = ClientAuth.objects.create(client=client)
+        auth.set_password('password456')
+
+        response = self.client.post(reverse('client-login'), {
+            'action': 'login',
+            'name': 'Bob',
+            'password': 'password456',
+        }, follow=True)
+
+        self.assertRedirects(response, reverse('client-dashboard'))
+        self.assertTrue(self.client.session.get_expire_at_browser_close())
 
     def test_login_page_shows_signup_form_before_dashboard_access(self):
         response = self.client.get(reverse('client-login'))

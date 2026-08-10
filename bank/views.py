@@ -473,7 +473,9 @@ class ClientAuthView(View):
                 if not client.wallets.exists():
                     Wallet.objects.create(client=client, balance=0.00, currency=currency)
 
+                request.session.flush()
                 request.session['client_id'] = str(client.id)
+                request.session.set_expiry(0)
                 return redirect('client-dashboard')
 
             return render(request, self.template_name, {
@@ -489,7 +491,9 @@ class ClientAuthView(View):
 
                 client = self._authenticate_client(name, password)
                 if client:
+                    request.session.flush()
                     request.session['client_id'] = str(client.id)
+                    request.session.set_expiry(0)
 
                     if not client.wallets.exists():
                         Wallet.objects.create(client=client, balance=0.00, currency='USD')
