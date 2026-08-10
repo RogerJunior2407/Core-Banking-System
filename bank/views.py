@@ -31,16 +31,22 @@ class ClientPortalPageView(TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         if getattr(self, 'require_login', True):
-            client_id = request.session.get('client_id')
+            client_id = kwargs.get('client_id') or request.session.get('client_id')
             if not client_id:
                 return redirect(reverse_lazy('client-login'))
+            request.session['client_id'] = str(client_id)
+            request.session.modified = True
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        client_id = self.kwargs.get('client_id') or self.request.session.get('client_id')
+        client = get_object_or_404(Client, id=client_id)
         context['active_page'] = self.active_page
         context['page_title'] = self.page_title
         context['wallet_form'] = CreateWalletForm()
+        context['client'] = client
+        context['client_id'] = client.id
         return context
 from django.shortcuts import redirect, get_object_or_404
 from django.db.models import Sum
@@ -54,9 +60,11 @@ class ClientDashboardView(ClientPortalPageView):
     page_title = 'Dashboard'
 
     def dispatch(self, request, *args, **kwargs):
-        # Redirect to login if user session is missing or invalid
-        if not request.session.get('client_id'):
+        client_id = kwargs.get('client_id') or request.session.get('client_id')
+        if not client_id:
             return redirect('client-login')
+        request.session['client_id'] = str(client_id)
+        request.session.modified = True
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):

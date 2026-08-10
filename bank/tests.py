@@ -139,7 +139,7 @@ class ClientLoginTests(TestCase):
     def test_client_payment_page_displays_remaining_amount_to_pay(self):
         owner = Client.objects.create(name='Alice', phone='555555555', age=34, adress='Paris')
         provider = ServiceProvider.objects.create(name='Electricity', category='ELECTRICITY')
-        bill = Bill.objects.create(client=owner, provider=provider, reference_number='REF-005', amount_due='100.00')
+        Bill.objects.create(client=owner, provider=provider, reference_number='REF-005', amount_due='100.00')
 
         session = self.client.session
         session['client_id'] = str(owner.id)
@@ -150,3 +150,11 @@ class ClientLoginTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Remaining to pay')
         self.assertContains(response, '100.00')
+
+    def test_client_can_open_a_client_specific_portal_page(self):
+        owner = Client.objects.create(name='Charlie', phone='666666666', age=35, adress='Marseille')
+
+        response = self.client.get(reverse('client-dashboard-by-id', args=[owner.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, owner.name)

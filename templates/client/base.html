@@ -247,12 +247,21 @@
         <aside class="sidebar">
             <div class="brand">CBS Client</div>
             <nav class="nav-list">
+                {% if client %}
+                <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'client-dashboard-by-id' client.id %}">Dashboard</a>
+                <a class="nav-link {% if active_page == 'wallet' %}active{% endif %}" href="{% url 'client-wallet-by-id' client.id %}">Wallet</a>
+                <a class="nav-link {% if active_page == 'deposit' %}active{% endif %}" href="{% url 'client-deposit-by-id' client.id %}">Deposit</a>
+                <a class="nav-link {% if active_page == 'transfer' %}active{% endif %}" href="{% url 'client-transfer-by-id' client.id %}">Transfer</a>
+                <a class="nav-link {% if active_page == 'payment' %}active{% endif %}" href="{% url 'client-payment-by-id' client.id %}">Payment</a>
+                <a class="nav-link {% if active_page == 'report' %}active{% endif %}" href="{% url 'client-report-by-id' client.id %}">Reports</a>
+                {% else %}
                 <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'client-dashboard' %}">Dashboard</a>
                 <a class="nav-link {% if active_page == 'wallet' %}active{% endif %}" href="{% url 'client-wallet' %}">Wallet</a>
                 <a class="nav-link {% if active_page == 'deposit' %}active{% endif %}" href="{% url 'client-deposit' %}">Deposit</a>
                 <a class="nav-link {% if active_page == 'transfer' %}active{% endif %}" href="{% url 'client-transfer' %}">Transfer</a>
                 <a class="nav-link {% if active_page == 'payment' %}active{% endif %}" href="{% url 'client-payment' %}">Payment</a>
                 <a class="nav-link {% if active_page == 'report' %}active{% endif %}" href="{% url 'client-report' %}">Reports</a>
+                {% endif %}
             </nav>
         </aside>
 
