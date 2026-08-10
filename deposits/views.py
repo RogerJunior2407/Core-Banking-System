@@ -13,9 +13,4 @@ class DepositListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['created_at', 'amount']
 
     def perform_create(self, serializer):
-        with transaction.atomic():
-            wallet = serializer.validated_data['wallet']
-            wallet = type(wallet).objects.select_for_update().get(pk=wallet.pk)
-            deposit = serializer.save()
-            wallet.balance += deposit.amount
-            wallet.save(update_fields=['balance'])
+        serializer.save()

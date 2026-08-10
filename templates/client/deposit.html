@@ -80,7 +80,7 @@ document.getElementById('deposit-form').addEventListener('submit', async (e) => 
             return;
         }
 
-        messageBox.innerHTML = `<p style="color:green;">Deposit successful!</p>`;
+        messageBox.innerHTML = `<p style="color:green;">Deposit submitted successfully. It is waiting for admin confirmation.</p>`;
         document.getElementById('deposit-form').reset();
 
     } catch (err) {

@@ -5,8 +5,8 @@ from .models import Deposit
 class DepositSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deposit
-        fields = ['id', 'wallet', 'amount', 'channel', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        fields = ['id', 'wallet', 'amount', 'channel', 'created_at', 'is_confirmed', 'confirmed_at']
+        read_only_fields = ['id', 'created_at', 'is_confirmed', 'confirmed_at']
 
     def validate_amount(self, value):
         if value <= 0:
