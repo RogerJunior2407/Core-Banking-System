@@ -589,6 +589,26 @@
             margin-bottom: 0.9rem;
             font-size: 0.9rem;
         }
+
+        .admin-notice {
+            margin-bottom: 1rem;
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            border: 1px solid transparent;
+        }
+
+        .admin-notice-success {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #86efac;
+        }
+
+        .admin-notice-error {
+            background: #fee2e2;
+            color: #b91c1c;
+            border-color: #fca5a5;
+        }
     </style>
 </head>
 <body>
@@ -622,10 +642,55 @@
             </div>
         </header>
 
+        {% if admin_message %}
+            <div class="admin-notice admin-notice-{{ admin_message_type }}">{{ admin_message }}</div>
+        {% endif %}
+        {% if admin_error %}
+            <div class="admin-notice admin-notice-error">{{ admin_error }}</div>
+        {% endif %}
+
         <p id="global-feedback-message" class="form-feedback-message global-feedback-message" role="alert"></p>
 
         <!-- 1. DASHBOARD TAB -->
         <section id="tab-dashboard" class="tab-content active">
+            {% if pending_deposits or pending_transfers %}
+            <div class="card">
+                <div class="card-header-flex">
+                    <h3 class="card-title">Pending approvals</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    {% for deposit in pending_deposits %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                            <div>
+                                <strong>Deposit • {{ deposit.wallet.client.name }}</strong>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Wallet #{{ deposit.wallet.id }} • {{ deposit.amount }} {{ deposit.wallet.currency }}</div>
+                            </div>
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="confirm_deposit">
+                                <input type="hidden" name="deposit_id" value="{{ deposit.id }}">
+                                <button type="submit" class="btn btn-primary">Approve</button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                    {% for transfer in pending_transfers %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                            <div>
+                                <strong>Transfer • {{ transfer.source_wallet.client.name }}</strong>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">{{ transfer.amount }} {{ transfer.source_wallet.currency }} → Wallet #{{ transfer.destination_wallet.id }}</div>
+                            </div>
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="authorize_transfer">
+                                <input type="hidden" name="transfer_id" value="{{ transfer.id }}">
+                                <button type="submit" class="btn btn-primary">Authorize</button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             <div class="grid-3">
                 <div class="card metric-card">
                     <div class="metric-info">
@@ -790,6 +855,24 @@
                 <!-- Deposits History -->
                 <div class="card">
                     <h3 class="card-title" style="margin-bottom: 1rem;">Deposit History</h3>
+                    {% if pending_deposits %}
+                    <div style="margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        {% for deposit in pending_deposits %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                            <div>
+                                <strong>{{ deposit.wallet.client.name }}</strong>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">{{ deposit.amount }} {{ deposit.wallet.currency }}</div>
+                            </div>
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="confirm_deposit">
+                                <input type="hidden" name="deposit_id" value="{{ deposit.id }}">
+                                <button type="submit" class="btn btn-primary">Approve</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -843,6 +926,24 @@
                 <!-- Transfers History -->
                 <div class="card">
                     <h3 class="card-title" style="margin-bottom: 1rem;">Transfer Logs</h3>
+                    {% if pending_transfers %}
+                    <div style="margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        {% for transfer in pending_transfers %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                            <div>
+                                <strong>{{ transfer.source_wallet.client.name }}</strong>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">{{ transfer.amount }} {{ transfer.source_wallet.currency }} → Wallet #{{ transfer.destination_wallet.id }}</div>
+                            </div>
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="authorize_transfer">
+                                <input type="hidden" name="transfer_id" value="{{ transfer.id }}">
+                                <button type="submit" class="btn btn-primary">Authorize</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     <div class="table-responsive">
                         <table>
                             <thead>

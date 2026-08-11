@@ -269,6 +269,29 @@
         </article>
     </div>
 
+    {% if pending_items %}
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Pending approval</p>
+                <h3>Awaiting admin review</h3>
+            </div>
+            <a href="/admin/" class="btn btn-primary">Open admin</a>
+        </div>
+        <ul class="activity-list">
+            {% for item in pending_items %}
+                <li class="activity-item">
+                    <div>
+                        <strong>{{ item.title }}</strong>
+                        <p>{{ item.detail }}</p>
+                    </div>
+                    <span>{{ item.badge }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
     <div class="content-grid">
         <section class="panel">
             <div class="section-head">

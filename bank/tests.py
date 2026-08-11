@@ -1,8 +1,12 @@
+from decimal import Decimal
+
 from django.test import TestCase
 from django.urls import reverse
 
 from bank.models import Client, ClientAuth, Wallet
+from deposits.models import Deposit
 from paiement.models import Bill, Payment, ServiceProvider
+from transfer.models import Transfer
 
 
 class ClientLoginTests(TestCase):
@@ -168,10 +172,40 @@ class ClientLoginTests(TestCase):
         self.assertContains(response, 'Remaining to pay')
         self.assertContains(response, '100.00')
 
-    def test_client_can_open_a_client_specific_portal_page(self):
+    def test_client_dashboard_shows_pending_approvals_and_admin_link(self):
         owner = Client.objects.create(name='Charlie', phone='666666666', age=35, adress='Marseille')
+        wallet = Wallet.objects.create(client=owner, balance=Decimal('50.00'), currency='USD')
+        Deposit.objects.create(wallet=wallet, amount=Decimal('20.00'), channel='CASH')
 
         response = self.client.get(reverse('client-dashboard-by-id', args=[owner.id]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, owner.name)
+        self.assertContains(response, 'Pending approval')
+        self.assertContains(response, '/admin/')
+
+    def test_admin_portal_accepts_deposit_and_transfer_approval_actions(self):
+        owner = Client.objects.create(name='Diana', phone='777777777', age=40, adress='Lyon')
+        source_wallet = Wallet.objects.create(client=owner, balance=Decimal('100.00'), currency='USD')
+        destination_wallet = Wallet.objects.create(client=owner, balance=Decimal('20.00'), currency='USD')
+        deposit = Deposit.objects.create(wallet=source_wallet, amount=Decimal('30.00'), channel='BANK_TRANSFER')
+        transfer = Transfer.objects.create(source_wallet=source_wallet, destination_wallet=destination_wallet, amount=Decimal('15.00'))
+
+        session = self.client.session
+        session['admin_authenticated'] = True
+        session.save()
+
+        response = self.client.post(reverse('admin-portal'), {
+            'action': 'confirm_deposit',
+            'deposit_id': deposit.id,
+        })
+        self.assertEqual(response.status_code, 200)
+        deposit.refresh_from_db()
+        self.assertTrue(deposit.is_confirmed)
+
+        response = self.client.post(reverse('admin-portal'), {
+            'action': 'authorize_transfer',
+            'transfer_id': transfer.id,
+        })
+        self.assertEqual(response.status_code, 200)
+        transfer.refresh_from_db()
+        self.assertTrue(transfer.is_confirmed)

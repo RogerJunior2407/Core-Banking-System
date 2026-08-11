@@ -87,6 +87,26 @@ class ClientDashboardView(ClientPortalPageView):
         last_deposit = Deposit.objects.filter(wallet__client=client).order_by('-created_at').first()
         last_transfer = Transfer.objects.filter(source_wallet__client=client).order_by('-created_at').first()
 
+        pending_deposits = Deposit.objects.filter(wallet__client=client, is_confirmed=False).select_related('wallet').order_by('-created_at')
+        pending_transfers = Transfer.objects.filter(source_wallet__client=client, is_confirmed=False).select_related('source_wallet', 'destination_wallet').order_by('-created_at')
+
+        pending_items = []
+        for item in pending_deposits:
+            pending_items.append({
+                'title': 'Deposit pending approval',
+                'detail': f'{item.amount} {item.wallet.currency} waiting for admin confirmation',
+                'date': item.created_at,
+                'badge': 'Pending approval',
+            })
+        for item in pending_transfers:
+            pending_items.append({
+                'title': 'Transfer pending authorization',
+                'detail': f'{item.amount} {item.source_wallet.currency} waiting for admin authorization',
+                'date': item.created_at,
+                'badge': 'Pending approval',
+            })
+        pending_items.sort(key=lambda x: x['date'], reverse=True)
+
         # 3. Optimized activity feed (fetch top 3 from each table first)
         recent_deposits = Deposit.objects.filter(wallet__client=client).select_related('wallet').order_by('-created_at')[:3]
         recent_transfers = Transfer.objects.filter(source_wallet__client=client).select_related('source_wallet', 'destination_wallet').order_by('-created_at')[:3]
@@ -116,6 +136,7 @@ class ClientDashboardView(ClientPortalPageView):
             'currency': wallets.first().currency if wallets.exists() else '',
             'last_deposit': last_deposit,
             'last_transfer': last_transfer,
+            'pending_items': pending_items[:5],
             'recent_activity': activity[:3],
             'wallet_form': CreateWalletForm(),
         })
@@ -353,25 +374,54 @@ class AdminPortalView(TemplateView):
     template_name = 'index.html'
     admin_password = 'STEN'
 
-    def get(self, request, *args, **kwargs):
+    def _render_admin_page(self, request, *, admin_error=None, admin_message=None, admin_message_type='success'):
+        pending_deposits = Deposit.objects.filter(is_confirmed=False).select_related('wallet__client').order_by('-created_at')[:10]
+        pending_transfers = Transfer.objects.filter(is_confirmed=False).select_related('source_wallet__client', 'destination_wallet').order_by('-created_at')[:10]
+
         return render(request, self.template_name, {
             'admin_authenticated': request.session.get('admin_authenticated', False),
-            'admin_error': None,
+            'admin_error': admin_error,
+            'admin_message': admin_message,
+            'admin_message_type': admin_message_type,
+            'pending_deposits': pending_deposits,
+            'pending_transfers': pending_transfers,
         })
 
+    def get(self, request, *args, **kwargs):
+        return self._render_admin_page(request)
+
     def post(self, request, *args, **kwargs):
+        action = (request.POST.get('action') or '').strip()
+
+        if action == 'confirm_deposit':
+            if not request.session.get('admin_authenticated', False):
+                return self._render_admin_page(request, admin_error='Please log in to approve transactions.')
+
+            deposit_id = request.POST.get('deposit_id')
+            deposit = get_object_or_404(Deposit, pk=deposit_id)
+            if not deposit.is_confirmed:
+                deposit.confirm()
+                return self._render_admin_page(request, admin_message='Deposit approved successfully.')
+            return self._render_admin_page(request, admin_message='Deposit was already approved.')
+
+        if action == 'authorize_transfer':
+            if not request.session.get('admin_authenticated', False):
+                return self._render_admin_page(request, admin_error='Please log in to approve transactions.')
+
+            transfer_id = request.POST.get('transfer_id')
+            transfer = get_object_or_404(Transfer, pk=transfer_id)
+            if not transfer.is_confirmed:
+                transfer.authorize()
+                return self._render_admin_page(request, admin_message='Transfer authorized successfully.')
+            return self._render_admin_page(request, admin_message='Transfer was already authorized.')
+
         password = (request.POST.get('password') or '').strip()
         if password == self.admin_password:
             request.session['admin_authenticated'] = True
-            return render(request, self.template_name, {
-                'admin_authenticated': True,
-                'admin_error': None,
-            })
+            request.session.modified = True
+            return self._render_admin_page(request, admin_message='Welcome back, admin.')
 
-        return render(request, self.template_name, {
-            'admin_authenticated': False,
-            'admin_error': 'Invalid password. Please try again.',
-        })
+        return self._render_admin_page(request, admin_error='Invalid password. Please try again.')
 
 
 class SetPasswordForm(forms.Form):
