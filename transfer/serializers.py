@@ -3,9 +3,11 @@ from .models import Transfer
 
 
 class TransferSerializer(serializers.ModelSerializer):
+    client_id = serializers.UUIDField(write_only=True, required=False, allow_null=True)
+
     class Meta:
         model = Transfer
-        fields = ['id', 'source_wallet', 'destination_wallet', 'amount', 'created_at']
+        fields = ['id', 'source_wallet', 'destination_wallet', 'amount', 'client_id', 'created_at']
         read_only_fields = ['id', 'created_at']
 
     def validate_amount(self, value):
@@ -17,12 +19,16 @@ class TransferSerializer(serializers.ModelSerializer):
         source = data['source_wallet']
         destination = data['destination_wallet']
         amount = data['amount']
+        client_id = data.get('client_id')
 
         if source.pk == destination.pk:
             raise serializers.ValidationError("Source and destination wallets must be different.")
 
         if source.currency.lower() != destination.currency.lower():
             raise serializers.ValidationError("Source and destination wallets must have the same currency.")
+
+        if client_id and source.client_id != client_id:
+            raise serializers.ValidationError({'client_id': 'The selected source wallet does not belong to the active client.'})
 
         if source.balance < amount:
             raise serializers.ValidationError("Insufficient balance in source wallet.")

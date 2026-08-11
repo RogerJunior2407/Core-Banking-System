@@ -58,3 +58,22 @@ class DepositConfirmationTests(TestCase):
         deposit.refresh_from_db()
         self.assertTrue(deposit.is_confirmed)
         self.assertEqual(len(messages), 1)
+
+    def test_deposit_creation_requires_matching_client_context(self):
+        owner = Client.objects.create(name='Dora', phone='666666666', age=28, adress='Nantes')
+        other = Client.objects.create(name='Evan', phone='777777777', age=33, adress='Lille')
+        wallet = Wallet.objects.create(client=owner, balance=Decimal('100.00'), currency='USD')
+
+        response = self.client.post(
+            reverse('deposit-list-create'),
+            data={
+                'wallet': wallet.id,
+                'amount': '25.00',
+                'channel': 'MOBILE_MONEY',
+                'client_id': str(other.id),
+            },
+            content_type='application/json',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('client_id', response.json())

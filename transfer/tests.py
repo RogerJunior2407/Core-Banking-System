@@ -37,3 +37,23 @@ class TransferAuthorizationTests(TestCase):
         self.assertEqual(source_wallet.balance, Decimal('75.00'))
         self.assertEqual(destination_wallet.balance, Decimal('35.00'))
         self.assertEqual(len(messages), 1)
+
+    def test_transfer_creation_requires_matching_client_context(self):
+        source_client = Client.objects.create(name='Fiona', phone='888888888', age=37, adress='Reims')
+        destination_client = Client.objects.create(name='Gabe', phone='999999999', age=42, adress='Montpellier')
+        source_wallet = Wallet.objects.create(client=source_client, balance=Decimal('100.00'), currency='USD')
+        destination_wallet = Wallet.objects.create(client=destination_client, balance=Decimal('10.00'), currency='USD')
+
+        response = self.client.post(
+            '/transfer/',
+            data={
+                'source_wallet': source_wallet.id,
+                'destination_wallet': destination_wallet.id,
+                'amount': '25.00',
+                'client_id': str(destination_client.id),
+            },
+            content_type='application/json',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('client_id', response.json())

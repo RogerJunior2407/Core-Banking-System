@@ -11,6 +11,7 @@
         </div>
         <form id="transfer-form">
             {% csrf_token %}
+            <input type="hidden" id="client_id" value="{{ client.id }}">
             <div class="form-group">
                 <label for="source_wallet">From wallet</label>
                 <select class="form-control" id="source_wallet" required>
@@ -75,6 +76,7 @@ document.getElementById('transfer-form').addEventListener('submit', async (e) =>
     const source = document.getElementById('source_wallet').value;
     const destination = document.getElementById('destination_wallet').value;
     const amount = document.getElementById('amount').value;
+    const clientId = document.getElementById('client_id').value;
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     const messageBox = document.getElementById('transfer-message');
 
@@ -94,6 +96,7 @@ document.getElementById('transfer-form').addEventListener('submit', async (e) =>
                 source_wallet: parseInt(source),
                 destination_wallet: parseInt(destination),
                 amount: parseFloat(amount),
+                client_id: clientId,
             }),
         });
 
