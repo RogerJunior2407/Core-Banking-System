@@ -1,3 +1,4 @@
+import json
 from decimal import Decimal
 
 from django.contrib.admin.sites import site
@@ -10,6 +11,30 @@ from .models import Transfer
 
 
 class TransferAuthorizationTests(TestCase):
+    def test_transfer_api_accepts_json_payload_for_valid_client_transaction(self):
+        source_client = Client.objects.create(name='Dina', phone='444444444', age=35, adress='Nice')
+        destination_client = Client.objects.create(name='Eli', phone='555555555', age=40, adress='Bordeaux')
+        source_wallet = Wallet.objects.create(client=source_client, balance=Decimal('100.00'), currency='USD')
+        destination_wallet = Wallet.objects.create(client=destination_client, balance=Decimal('10.00'), currency='USD')
+
+        response = self.client.post(
+            '/transfer/',
+            data=json.dumps({
+                'source_wallet': source_wallet.id,
+                'destination_wallet': destination_wallet.id,
+                'amount': '25.00',
+                'client_id': str(source_client.id),
+            }),
+            content_type='application/json',
+            HTTP_HOST='localhost',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Transfer.objects.count(), 1)
+        transfer = Transfer.objects.get(source_wallet=source_wallet)
+        self.assertEqual(transfer.amount, Decimal('25.00'))
+        self.assertFalse(transfer.is_confirmed)
+
     def test_admin_action_authorizes_pending_transfers(self):
         source_client = Client.objects.create(name='Dina', phone='444444444', age=35, adress='Nice')
         destination_client = Client.objects.create(name='Eli', phone='555555555', age=40, adress='Bordeaux')

@@ -10,6 +10,10 @@ class TransferSerializer(serializers.ModelSerializer):
         fields = ['id', 'source_wallet', 'destination_wallet', 'amount', 'client_id', 'created_at']
         read_only_fields = ['id', 'created_at']
 
+    def create(self, validated_data):
+        validated_data.pop('client_id', None)
+        return Transfer.objects.create(**validated_data)
+
     def validate_amount(self, value):
         if value <= 0:
             raise serializers.ValidationError("Amount must be greater than zero.")
