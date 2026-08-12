@@ -269,6 +269,30 @@
         </article>
     </div>
 
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Balances by currency</p>
+                <h3>Total balance overview</h3>
+            </div>
+        </div>
+
+        {% if currency_totals %}
+            <div class="wallet-list">
+                {% for item in currency_totals %}
+                    <div class="wallet-item">
+                        <div>
+                            <p class="wallet-id">{{ item.currency }}</p>
+                            <h4>{{ item.total }} {{ item.currency }}</h4>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-state">No balances recorded yet.</p>
+        {% endif %}
+    </section>
+
     {% if pending_items %}
     <section class="panel">
         <div class="section-head">

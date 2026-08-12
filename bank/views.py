@@ -79,9 +79,10 @@ class ClientDashboardView(ClientPortalPageView):
         if client is None:
             return context
         wallets = Wallet.objects.filter(client=client)
+        currency_totals = list(wallets.values('currency').annotate(total=Sum('balance')).order_by('currency'))
 
-        # 1. Total balance calculation
-        total_balance = wallets.aggregate(total=Sum('balance'))['total'] or 0
+        # 1. Total balance calculation by currency and overall total
+        total_balance = sum((item['total'] or 0 for item in currency_totals), 0)
 
         # 2. Latest deposit and transfer
         last_deposit = Deposit.objects.filter(wallet__client=client).order_by('-created_at').first()
@@ -132,6 +133,7 @@ class ClientDashboardView(ClientPortalPageView):
         context.update({
             'client': client,
             'wallets': wallets,
+            'currency_totals': currency_totals,
             'total_balance': total_balance,
             'currency': wallets.first().currency if wallets.exists() else '',
             'last_deposit': last_deposit,

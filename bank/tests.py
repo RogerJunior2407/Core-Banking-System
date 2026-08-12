@@ -183,6 +183,22 @@ class ClientLoginTests(TestCase):
         self.assertContains(response, 'Pending approval')
         self.assertContains(response, '/admin/')
 
+    def test_client_dashboard_groups_total_balance_by_currency(self):
+        owner = Client.objects.create(name='Faiza', phone='101010101', age=39, adress='Paris')
+        Wallet.objects.create(client=owner, balance=Decimal('100.00'), currency='USD')
+        Wallet.objects.create(client=owner, balance=Decimal('50.00'), currency='USD')
+        Wallet.objects.create(client=owner, balance=Decimal('80.00'), currency='EUR')
+
+        response = self.client.get(reverse('client-dashboard-by-id', args=[owner.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_balance'], Decimal('230.00'))
+        self.assertIn('currency_totals', response.context)
+        self.assertEqual(list(response.context['currency_totals']), [
+            {'currency': 'EUR', 'total': Decimal('80.00')},
+            {'currency': 'USD', 'total': Decimal('150.00')},
+        ])
+
     def test_admin_portal_accepts_deposit_and_transfer_approval_actions(self):
         owner = Client.objects.create(name='Diana', phone='777777777', age=40, adress='Lyon')
         source_wallet = Wallet.objects.create(client=owner, balance=Decimal('100.00'), currency='USD')
