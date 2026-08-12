@@ -5,7 +5,7 @@ from django import forms
 from django.http import Http404
 from rest_framework import generics, viewsets 
 from .models import Client, Wallet, ClientAuth
-from .serializers import ChangePasswordserializer, ClientSerializer, WalletSerializer, WalletBalanceSerializer
+from .serializers import ChangePasswordSerializer, ClientSerializer, WalletSerializer, WalletBalanceSerializer
 from django.contrib import messages
 from transfer.models import Transfer
 from django.db import transaction
@@ -450,11 +450,6 @@ class SetPasswordView(FormView):
         return super().form_valid(form)
 
 
-def logout_view(request):
-    request.session.pop('client_id', None)
-    return redirect(reverse_lazy('client-login'))
-
-
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
@@ -470,7 +465,7 @@ class WalletBalanceView(generics.RetrieveAPIView):
     serializer_class = WalletBalanceSerializer
     
 class ChangePasswordView(generics.UpdateAPIView):
-    serializer_class = ChangePasswordserializer
+    serializer_class = ChangePasswordSerializer
 
     def get_object(self):
         client_id = self.kwargs.get('client_id') or self.request.POST.get('client_id') or self.request.session.get('client_id')

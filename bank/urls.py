@@ -1,12 +1,19 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ClientAuthView, CreateWalletView,  SetPasswordView, logout_view, ClientDashboardView, ClientWalletView, ClientDepositView, ClientTransferView, ClientPaymentView, ClientReportView
 from .views import (
-    ClientViewSet,
-    WalletViewSet,
-    WalletBalanceView,
-    SetPasswordView,
     ChangePasswordView,
+    ClientAuthView,
+    ClientDashboardView,
+    ClientDepositView,
+    ClientPaymentView,
+    ClientReportView,
+    ClientTransferView,
+    ClientViewSet,
+    ClientWalletView,
+    CreateWalletView,
+    SetPasswordView,
+    WalletBalanceView,
+    WalletViewSet,
     logout_view,
 )
 
