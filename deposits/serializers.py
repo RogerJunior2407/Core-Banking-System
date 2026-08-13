@@ -10,6 +10,11 @@ class DepositSerializer(serializers.ModelSerializer):
         fields = ['id', 'wallet', 'amount', 'channel', 'client_id', 'created_at', 'is_confirmed', 'confirmed_at']
         read_only_fields = ['id', 'created_at', 'is_confirmed', 'confirmed_at']
 
+    def create(self, validated_data):
+        # Remove non-model field before creating the Deposit instance
+        validated_data.pop('client_id', None)
+        return Deposit.objects.create(**validated_data)
+
     def validate_amount(self, value):
         if value <= 0:
             raise serializers.ValidationError("Amount must be greater than zero.")
