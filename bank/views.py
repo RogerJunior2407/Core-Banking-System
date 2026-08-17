@@ -5,7 +5,7 @@ from django import forms
 from django.http import Http404
 from rest_framework import generics, viewsets 
 from .models import Client, Wallet, ClientAuth
-from .serializers import ChangePasswordSerializer, ClientSerializer, WalletSerializer, WalletBalanceSerializer
+from .serializers import ChangePasswordserializer, ClientSerializer, WalletSerializer, WalletBalanceSerializer
 from django.contrib import messages
 from transfer.models import Transfer
 from django.db import transaction
@@ -79,10 +79,9 @@ class ClientDashboardView(ClientPortalPageView):
         if client is None:
             return context
         wallets = Wallet.objects.filter(client=client)
-        currency_totals = list(wallets.values('currency').annotate(total=Sum('balance')).order_by('currency'))
 
-        # 1. Total balance calculation by currency and overall total
-        total_balance = sum((item['total'] or 0 for item in currency_totals), 0)
+        # 1. Total balance calculation
+        total_balance = wallets.aggregate(total=Sum('balance'))['total'] or 0
 
         # 2. Latest deposit and transfer
         last_deposit = Deposit.objects.filter(wallet__client=client).order_by('-created_at').first()
@@ -133,7 +132,6 @@ class ClientDashboardView(ClientPortalPageView):
         context.update({
             'client': client,
             'wallets': wallets,
-            'currency_totals': currency_totals,
             'total_balance': total_balance,
             'currency': wallets.first().currency if wallets.exists() else '',
             'last_deposit': last_deposit,
@@ -452,6 +450,11 @@ class SetPasswordView(FormView):
         return super().form_valid(form)
 
 
+def logout_view(request):
+    request.session.pop('client_id', None)
+    return redirect(reverse_lazy('client-login'))
+
+
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
@@ -467,7 +470,7 @@ class WalletBalanceView(generics.RetrieveAPIView):
     serializer_class = WalletBalanceSerializer
     
 class ChangePasswordView(generics.UpdateAPIView):
-    serializer_class = ChangePasswordSerializer
+    serializer_class = ChangePasswordserializer
 
     def get_object(self):
         client_id = self.kwargs.get('client_id') or self.request.POST.get('client_id') or self.request.session.get('client_id')
@@ -515,7 +518,7 @@ class ClientAuthView(View):
             'signup_form': ClientSignUpForm(),
             'active_tab': 'login',
         })
-
+        
     def post(self, request):
         action = request.POST.get('action')
 
