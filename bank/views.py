@@ -5,7 +5,7 @@ from django import forms
 from django.http import Http404
 from rest_framework import generics, viewsets 
 from .models import Client, Wallet, ClientAuth
-from .serializers import ChangePasswordserializer, ClientSerializer, WalletSerializer, WalletBalanceSerializer
+from .serializers import ClientSerializer, WalletSerializer, WalletBalanceSerializer, ChangePasswordSerializer
 from django.contrib import messages
 from transfer.models import Transfer
 from django.db import transaction
@@ -468,9 +468,9 @@ class WalletViewSet(viewsets.ModelViewSet):
 class WalletBalanceView(generics.RetrieveAPIView):
     queryset = Wallet.objects.all()
     serializer_class = WalletBalanceSerializer
-    
+
 class ChangePasswordView(generics.UpdateAPIView):
-    serializer_class = ChangePasswordserializer
+    serializer_class = ChangePasswordSerializer
 
     def get_object(self):
         client_id = self.kwargs.get('client_id') or self.request.POST.get('client_id') or self.request.session.get('client_id')
