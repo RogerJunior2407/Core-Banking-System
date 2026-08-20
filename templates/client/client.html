@@ -72,7 +72,10 @@
         text-decoration: none;
         display: inline-flex;
         align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s ease;
     }
+    .btn-logout:hover { background: #fee2e2; }
 
     .stats-grid {
         display: grid;
@@ -123,14 +126,6 @@
         gap: 1rem;
     }
 
-    .panel {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 18px;
-        padding: 1rem 1.1rem;
-        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
-    }
-
     .section-head {
         display: flex;
         justify-content: space-between;
@@ -151,13 +146,6 @@
         letter-spacing: -0.02em;
     }
 
-    .btn-primary {
-        background: #2563eb;
-        color: white;
-        padding: 0.62rem 0.9rem;
-        border-radius: 10px;
-    }
-
     .wallet-create-form {
         display: flex;
         gap: 0.6rem;
@@ -171,6 +159,7 @@
         border-radius: 10px;
         border: 1px solid #d1d5db;
         background: white;
+        font: inherit;
     }
 
     .wallet-list,
@@ -241,37 +230,40 @@
 <div class="dashboard-shell">
     <section class="hero-card">
         <div>
-            <p class="eyebrow">Client overview</p>
-            <h2>Welcome, {{ client.name }} </h2>
-            <p class="hero-meta">Phone: {{ client.phone }} • Address: {{ client.adress|default:"N/A" }}</p>
+            <p class="eyebrow">Aperçu client</p>
+            <h2>Bienvenue, {{ client.name }} </h2>
+            <p class="hero-meta">Téléphone : {{ client.phone }} • Adresse : {{ client.adress|default:"Non renseignée" }}</p>
         </div>
         <div class="hero-actions">
             <div class="hero-badge">
                 <span class="dot"></span>
-                {{ wallets|length }} active wallet{{ wallets|pluralize }}
+                {{ wallets|length }} portefeuille{{ wallets|pluralize }} actif{{ wallets|pluralize }}
             </div>
-            <a href="{% url 'client-logout' %}" class="btn-logout">Log out</a>
+            <a href="{% url 'client-logout' %}" class="btn-logout">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+                Déconnexion
+            </a>
         </div>
     </section>
 
     <div class="stats-grid">
         <article class="stat-card">
-            <p class="stat-label">Last deposit</p>
+            <p class="stat-label">Dernier dépôt</p>
             {% if last_deposit %}
                 <h4>{{ last_deposit.amount }} {{ currency }}</h4>
-                <small>{{ last_deposit.created_at|date:"M d, Y" }}</small>
+                <small>{{ last_deposit.created_at|date:"d M Y" }}</small>
             {% else %}
-                <p class="empty-state">No deposits recorded yet.</p>
+                <p class="empty-state">Aucun dépôt enregistré.</p>
             {% endif %}
         </article>
 
         <article class="stat-card">
-            <p class="stat-label">Last transfer</p>
+            <p class="stat-label">Dernier virement</p>
             {% if last_transfer %}
                 <h4>{{ last_transfer.amount }} {{ currency }}</h4>
-                <small>To wallet #{{ last_transfer.destination_wallet_id }}</small>
+                <small>Vers portefeuille #{{ last_transfer.destination_wallet_id }}</small>
             {% else %}
-                <p class="empty-state">No transfers yet.</p>
+                <p class="empty-state">Aucun virement effectué.</p>
             {% endif %}
         </article>
     </div>
@@ -279,8 +271,8 @@
     <section class="panel">
         <div class="section-head">
             <div>
-                <p class="eyebrow">Balances by currency</p>
-                <h3>Total balance overview</h3>
+                <p class="eyebrow">Soldes par devise</p>
+                <h3>Aperçu du solde total</h3>
             </div>
         </div>
 
@@ -296,7 +288,7 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p class="empty-state">No balances recorded yet.</p>
+            <p class="empty-state">Aucun solde enregistré.</p>
         {% endif %}
     </section>
 
@@ -304,10 +296,10 @@
     <section class="panel">
         <div class="section-head">
             <div>
-                <p class="eyebrow">Pending approval</p>
-                <h3>Awaiting admin review</h3>
+                <p class="eyebrow">En attente de validation</p>
+                <h3>En cours d'examen par l'administrateur</h3>
             </div>
-            <a href="/admin/" class="btn btn-primary">Open admin</a>
+            <a href="/admin/" class="btn btn-primary">Ouvrir l'administration</a>
         </div>
         <ul class="activity-list">
             {% for item in pending_items %}
@@ -327,14 +319,14 @@
         <section class="panel">
             <div class="section-head">
                 <div>
-                    <p class="eyebrow">Wallets</p>
-                    <h3>Your wallets</h3>
+                    <p class="eyebrow">Portefeuilles</p>
+                    <h3>Vos portefeuilles</h3>
                 </div>
                 <form action="{% url 'create-wallet' %}" method="POST" class="wallet-create-form">
                     {% csrf_token %}
                     <input type="hidden" name="client_id" value="{{ client.id }}">
                     {{ wallet_form.currency }}
-                    <button type="submit" class="btn btn-primary">+ New Wallet</button>
+                    <button type="submit" class="btn btn-primary">+ Nouveau portefeuille</button>
                 </form>
             </div>
 
@@ -343,23 +335,23 @@
                     {% for wallet in wallets %}
                         <div class="wallet-item">
                             <div>
-                                <p class="wallet-id">Wallet #{{ wallet.id }}</p>
+                                <p class="wallet-id">Portefeuille #{{ wallet.id }}</p>
                                 <h4>{{ wallet.balance }} {{ wallet.currency }}</h4>
                             </div>
-                            <span class="wallet-status">Active</span>
+                            <span class="wallet-status">Actif</span>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="empty-state">No wallets available yet.</p>
+                <p class="empty-state">Aucun portefeuille disponible pour le moment.</p>
             {% endif %}
         </section>
 
         <section class="panel">
             <div class="section-head">
                 <div>
-                    <p class="eyebrow">Activity</p>
-                    <h3>Recent activity</h3>
+                    <p class="eyebrow">Activité</p>
+                    <h3>Activité récente</h3>
                 </div>
             </div>
 
@@ -371,12 +363,12 @@
                                 <strong>{{ item.title }}</strong>
                                 <p>{{ item.detail }}</p>
                             </div>
-                            <span>{{ item.date|date:"M d" }}</span>
+                            <span>{{ item.date|date:"d M" }}</span>
                         </li>
                     {% endfor %}
                 </ul>
             {% else %}
-                <p class="empty-state">No recent activity yet.</p>
+                <p class="empty-state">Aucune activité récente.</p>
             {% endif %}
         </section>
     </div>

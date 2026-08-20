@@ -1,71 +1,72 @@
 {% extends 'client/base.html' %}
-{% block title %}Transfer | CBS{% endblock %}
-{% block page_heading %}Transfer{% endblock %}
+{% block title %}Virement | CBS{% endblock %}
+{% block page_heading %}Virement{% endblock %}
+{% block topbar_tagline %}Envoyez de l'argent vers un autre portefeuille en quelques clics.{% endblock %}
 
 {% block content %}
 <div class="grid-2">
-    <!-- Formulaire d'envoi -->
     <div class="card">
         <div class="card-header">
-            <h3>Send money</h3>
+            <h3>Envoyer de l'argent</h3>
         </div>
         <form id="transfer-form">
             {% csrf_token %}
             <input type="hidden" id="client_id" value="{{ client.id }}">
             <div class="form-group">
-                <label for="source_wallet">From wallet</label>
+                <label for="source_wallet">Portefeuille source</label>
                 <select class="form-control" id="source_wallet" required>
-                    <option value="" disabled selected>Select your wallet...</option>
+                    <option value="" disabled selected>Sélectionnez votre portefeuille...</option>
                     {% for wallet in wallets %}
-                    <option value="{{ wallet.id }}">Wallet #{{ wallet.id }} — {{ wallet.balance }} {{ wallet.currency }}</option>
+                    <option value="{{ wallet.id }}">Portefeuille #{{ wallet.id }} — {{ wallet.balance }} {{ wallet.currency }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="form-group">
-                <label for="destination_wallet">Recipient wallet</label>
+                <label for="destination_wallet">Portefeuille destinataire</label>
                 <select class="form-control" id="destination_wallet" required>
-                    <option value="" disabled selected>Select destination...</option>
+                    <option value="" disabled selected>Sélectionnez le destinataire...</option>
                     {% for wallet in all_wallets %}
-                    <option value="{{ wallet.id }}">Wallet #{{ wallet.id }} — {{ wallet.client.name }}</option>
+                    <option value="{{ wallet.id }}">Portefeuille #{{ wallet.id }} — {{ wallet.client.name }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="form-group">
-                <label for="amount">Amount</label>
-                <input class="form-control" id="amount" type="number" step="0.01" min="0.01" placeholder="Enter amount" required />
+                <label for="amount">Montant</label>
+                <input class="form-control" id="amount" type="number" step="0.01" min="0.01" placeholder="Saisissez le montant" required />
             </div>
             <div id="transfer-message"></div>
-            <button class="btn btn-primary" type="submit">Confirm transfer</button>
+            <button class="btn btn-primary" type="submit">Confirmer le virement</button>
         </form>
     </div>
 
-    <!-- Tableau d'historique récent -->
     <div class="card">
         <div class="card-header">
-            <h3>Recent transfers</h3>
+            <h3>Virements récents</h3>
         </div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for transfer in recent_transfers %}
-                <tr>
-                    <td>Wallet #{{ transfer.source_wallet.id }}</td>
-                    <td>Wallet #{{ transfer.destination_wallet.id }}</td>
-                    <td><strong>{{ transfer.amount }}</strong></td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3">No recent transfers found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>De</th>
+                        <th>Vers</th>
+                        <th>Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transfer in recent_transfers %}
+                    <tr>
+                        <td>Portefeuille #{{ transfer.source_wallet.id }}</td>
+                        <td>Portefeuille #{{ transfer.destination_wallet.id }}</td>
+                        <td><strong>{{ transfer.amount }}</strong></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">Aucun virement récent.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -81,7 +82,7 @@ document.getElementById('transfer-form').addEventListener('submit', async (e) =>
     const messageBox = document.getElementById('transfer-message');
 
     if (source === destination) {
-        messageBox.innerHTML = `<p style="color:red; margin-top:10px;">Source and destination must differ.</p>`;
+        messageBox.innerHTML = `<div class="alert alert-danger">Les portefeuilles source et destinataire doivent être différents.</div>`;
         return;
     }
 
@@ -102,18 +103,17 @@ document.getElementById('transfer-form').addEventListener('submit', async (e) =>
 
         if (!response.ok) {
             const err = await response.json();
-            messageBox.innerHTML = `<p style="color:red; margin-top:10px;">${JSON.stringify(err)}</p>`;
+            messageBox.innerHTML = `<div class="alert alert-danger">${JSON.stringify(err)}</div>`;
             return;
         }
 
-        messageBox.innerHTML = `<p style="color:green; margin-top:10px;">Transfer successful!</p>`;
+        messageBox.innerHTML = `<div class="alert alert-success">Virement effectué avec succès !</div>`;
         document.getElementById('transfer-form').reset();
-        
-        // Recharge la page après 1 seconde pour mettre à jour les soldes et l'historique
+
         setTimeout(() => window.location.reload(), 1000);
 
     } catch (err) {
-        messageBox.innerHTML = `<p style="color:red; margin-top:10px;">Something went wrong.</p>`;
+        messageBox.innerHTML = `<div class="alert alert-danger">Une erreur est survenue.</div>`;
     }
 });
 </script>

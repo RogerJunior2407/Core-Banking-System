@@ -1,55 +1,56 @@
 {% extends 'client/base.html' %}
-{% block title %}Deposit | CBS{% endblock %}
-{% block page_heading %}Deposit{% endblock %}
+{% block title %}Dépôt | CBS{% endblock %}
+{% block page_heading %}Dépôt{% endblock %}
+{% block topbar_tagline %}Effectuez un dépôt sur votre portefeuille via mobile money, carte ou espèces.{% endblock %}
 
 {% block content %}
 <div class="grid-2">
     <div class="card">
         <div class="card-header">
-            <h3>New deposit</h3>
+            <h3>Nouveau dépôt</h3>
         </div>
         <form id="deposit-form">
             {% csrf_token %}
             <input type="hidden" id="client_id" value="{{ client.id }}">
             <div class="form-group">
-                <label for="wallet">Wallet</label>
+                <label for="wallet">Portefeuille</label>
                 <select class="form-control" id="wallet" required>
-                    <option value="" disabled selected>Select wallet...</option>
+                    <option value="" disabled selected>Sélectionnez un portefeuille...</option>
                     {% for wallet in wallets %}
-                    <option value="{{ wallet.id }}">Wallet #{{ wallet.id }} — {{ wallet.balance }} {{ wallet.currency }}</option>
+                    <option value="{{ wallet.id }}">Portefeuille #{{ wallet.id }} — {{ wallet.balance }} {{ wallet.currency }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="form-group">
-                <label for="amount">Amount</label>
-                <input class="form-control" id="amount" type="number" step="0.01" min="0.01" placeholder="Enter amount" required />
+                <label for="amount">Montant</label>
+                <input class="form-control" id="amount" type="number" step="0.01" min="0.01" placeholder="Saisissez le montant" required />
             </div>
             <div class="form-group">
-                <label for="method">Payment method</label>
+                <label for="method">Mode de paiement</label>
                 <select class="form-control" id="method">
                     <option value="MOBILE_MONEY">Mobile money</option>
-                    <option value="BANK_TRANSFER">Bank card</option>
-                    <option value="CASH">Cash deposit</option>
+                    <option value="BANK_TRANSFER">Carte bancaire</option>
+                    <option value="CASH">Dépôt en espèces</option>
                 </select>
             </div>
             <div id="deposit-message"></div>
-            <button class="btn btn-primary" type="submit">Submit deposit</button>
+            <button class="btn btn-primary" type="submit">Soumettre le dépôt</button>
         </form>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <h3>Deposit guide</h3>
+            <h3>Guide du dépôt</h3>
         </div>
         <div class="list-group">
             <div class="list-item">
-                <div><strong>Processing time</strong><p>Usually completed within minutes.</p></div>
+                <div><strong>Délai de traitement</strong><p>Généralement validé en quelques minutes.</p></div>
             </div>
             <div class="list-item">
-                <div><strong>Minimum amount</strong><p>500 XAF</p></div>
+                <div><strong>Montant minimum</strong><p>500 XAF</p></div>
             </div>
             <div class="list-item">
-                <div><strong>Supported channels</strong><p>Mobile money, cards, and direct bank deposit.</p></div>
+                <div><strong>Canaux supportés</strong><p>Mobile money, cartes et dépôt bancaire direct.</p></div>
             </div>
         </div>
     </div>
@@ -78,15 +79,15 @@ document.getElementById('deposit-form').addEventListener('submit', async (e) => 
 
         if (!response.ok) {
             const err = await response.json();
-            messageBox.innerHTML = `<p style="color:red;">${JSON.stringify(err)}</p>`;
+            messageBox.innerHTML = `<div class="alert alert-danger">${JSON.stringify(err)}</div>`;
             return;
         }
 
-        messageBox.innerHTML = `<p style="color:green;">Deposit submitted successfully. It is waiting for admin confirmation.</p>`;
+        messageBox.innerHTML = `<div class="alert alert-success">Dépôt soumis avec succès. En attente de validation par l'administrateur.</div>`;
         document.getElementById('deposit-form').reset();
 
     } catch (err) {
-        messageBox.innerHTML = `<p style="color:red;">Something went wrong.</p>`;
+        messageBox.innerHTML = `<div class="alert alert-danger">Une erreur est survenue.</div>`;
     }
 });
 </script>

@@ -1,31 +1,32 @@
 {% extends 'client/base.html' %}
-{% block title %}Wallet | CBS{% endblock %}
-{% block page_heading %}Wallet{% endblock %}
+{% block title %}Portefeuille | CBS{% endblock %}
+{% block page_heading %}Portefeuille{% endblock %}
+{% block topbar_tagline %}Consultez vos soldes, créez un portefeuille et suivez l'activité de votre compte.{% endblock %}
 
 {% block content %}
-<div class="card" style="margin-bottom: 1rem;">
+<div class="card">
     <div class="card-header">
-        <h3>Create a new wallet</h3>
+        <h3>Créer un nouveau portefeuille</h3>
     </div>
-    <form action="{% url 'create-wallet' %}" method="POST" style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+    <form action="{% url 'create-wallet' %}" method="POST" class="form-row">
         {% csrf_token %}
         <input type="hidden" name="client_id" value="{{ client.id }}">
         {{ wallet_form.currency }}
-        <button type="submit" class="btn btn-primary">Create wallet</button>
+        <button type="submit" class="btn btn-primary">Créer le portefeuille</button>
     </form>
 </div>
 
-<div class="card" style="margin-bottom: 1rem;">
+<div class="card">
     <div class="card-header">
-        <h3>Total amount across all wallets</h3>
+        <h3>Solde total tous portefeuilles confondus</h3>
     </div>
     <div class="card-body">
         {% if wallet_totals %}
             {% for total in wallet_totals %}
-            <p><strong>{{ total.currency }}</strong>: {{ total.total }}</p>
+            <p><strong>{{ total.currency }}</strong> : {{ total.total }}</p>
             {% endfor %}
         {% else %}
-            <p>No wallets found.</p>
+            <p>Aucun portefeuille trouvé.</p>
         {% endif %}
     </div>
 </div>
@@ -34,41 +35,43 @@
     {% for wallet in wallets %}
     <div class="card metric-card">
         <div>
-            <div class="metric-label">Wallet #{{ wallet.id }}</div>
+            <div class="metric-label">Portefeuille #{{ wallet.id }}</div>
             <h3>{{ wallet.balance }} {{ wallet.currency }}</h3>
         </div>
     </div>
     {% empty %}
-    <div class="card"><p>Aucun wallet trouvé.</p></div>
+    <div class="card"><p>Aucun portefeuille trouvé.</p></div>
     {% endfor %}
 </div>
 
 <div class="card">
     <div class="card-header">
-        <h3>Wallet activity</h3>
-        <span class="badge success">Updated</span>
+        <h3>Activité du portefeuille</h3>
+        <span class="badge success">À jour</span>
     </div>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Wallet</th>
-                <th>Type</th>
-                <th>Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in activity %}
-            <tr>
-                <td>{{ item.date|date:"Y-m-d" }}</td>
-                <td>{{ item.wallet }}</td>
-                <td>{{ item.type }}</td>
-                <td>{{ item.sign }}{{ item.amount }} {{ item.wallet }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="4">Aucune activité récente.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Portefeuille</th>
+                    <th>Type</th>
+                    <th>Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in activity %}
+                <tr>
+                    <td>{{ item.date|date:"Y-m-d" }}</td>
+                    <td>{{ item.wallet }}</td>
+                    <td>{{ item.type }}</td>
+                    <td>{{ item.sign }}{{ item.amount }} {{ item.currency }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">Aucune activité récente.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

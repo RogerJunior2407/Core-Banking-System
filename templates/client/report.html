@@ -1,22 +1,23 @@
 {% extends 'client/base.html' %}
-{% block title %}Reports & History | CBS{% endblock %}
-{% block page_heading %}Transaction History{% endblock %}
+{% block title %}Historique des transactions | CBS{% endblock %}
+{% block page_heading %}Historique des transactions{% endblock %}
+{% block topbar_tagline %}Consultez l'ensemble de vos transactions et opérations.{% endblock %}
 
 {% block content %}
 <div class="card">
     <div class="card-header">
-        <h3>All Transactions</h3>
+        <h3>Toutes les transactions</h3>
     </div>
-    
-    <div class="table-responsive">
+
+    <div class="table-wrap">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Reference</th>
+                    <th>Référence</th>
                     <th>Type</th>
-                    <th>Account / Wallet</th>
-                    <th>Details / Counterparty</th>
-                    <th>Amount</th>
+                    <th>Compte / Portefeuille</th>
+                    <th>Détails / Contrepartie</th>
+                    <th>Montant</th>
                 </tr>
             </thead>
             <tbody>
@@ -30,13 +31,13 @@
                     </td>
                     <td>{{ tx.wallet }}</td>
                     <td>{{ tx.counterparty }}</td>
-                    <td style="color: {% if tx.is_negative %}#e74c3c{% else %}#2ecc71{% endif %}; font-weight: bold;">
+                    <td class="amount {% if tx.is_negative %}amount-out{% else %}amount-in{% endif %}">
                         {{ tx.amount }}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" style="text-align: center; color: #888;">No transactions found for your account.</td>
+                    <td colspan="5" class="empty-row">Aucune transaction trouvée pour votre compte.</td>
                 </tr>
                 {% endfor %}
             </tbody>

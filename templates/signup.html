@@ -1,32 +1,34 @@
 {% extends 'client/base.html' %}
-{% block title %}Create an Account | CBS{% endblock %}
+{% block title %}Créer un compte | CBS{% endblock %}
+{% block page_heading %}Créer votre compte{% endblock %}
+{% block topbar_tagline %}Inscrivez-vous pour ouvrir un portefeuille bancaire principal.{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 500px; margin: 40px auto; padding: 20px;">
-    <h2>Create Your Account</h2>
-    <p>Sign up to open a main banking wallet.</p>
-    
+<div class="card narrow">
+    <h2>Créer votre compte</h2>
+    <p>Inscrivez-vous pour ouvrir un portefeuille bancaire principal.</p>
+
     <form method="POST">
         {% csrf_token %}
-        
+
         {% if form.non_field_errors %}
-            <div class="alert danger" style="color: red; margin-bottom: 15px;">
+            <div class="alert alert-danger">
                 {{ form.non_field_errors }}
             </div>
         {% endif %}
 
         {% for field in form %}
-            <div class="form-group" style="margin-bottom: 15px;">
+            <div class="form-group">
                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
                 {% if field.errors %}
-                    <small style="color: red;">{{ field.errors.0 }}</small>
+                    <div class="alert alert-danger">{{ field.errors.0 }}</div>
                 {% endif %}
             </div>
         {% endfor %}
 
         <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px;">
-            Register Account
+            Créer le compte
         </button>
     </form>
 </div>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Access | CBS</title>
+    <title>Accès client | CBS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,6 +16,7 @@
             --primary: #0f172a;
             --primary-soft: #e2e8f0;
             --border: #d1d5db;
+            --danger: #dc2626;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -113,6 +114,17 @@
             margin-bottom: 12px;
             background: #fee2e2;
             color: #b91c1c;
+            border: 1px solid rgba(220, 38, 38, 0.25);
+        }
+        .alert-success {
+            background: rgba(22, 163, 74, 0.10);
+            color: #166534;
+            border-color: rgba(22, 163, 74, 0.25);
+        }
+        .field-error {
+            margin-top: 8px;
+            color: var(--danger);
+            font-size: 0.88rem;
         }
         @media (max-width: 840px) {
             .auth-layout { grid-template-columns: 1fr; }
@@ -124,15 +136,15 @@
     <div class="auth-shell">
         <div class="auth-layout">
             <section class="auth-intro">
-                <span class="eyebrow">CBS Client Portal</span>
-                <h1>Banking access that feels simple.</h1>
-                <p>Sign in to your dashboard or create a new account first. Secure access is ready for your client portal.</p>
+                <span class="eyebrow">Portail Client CBS</span>
+                <h1>Un accès bancaire qui reste simple.</h1>
+                <p>Connectez-vous à votre tableau de bord ou créez un nouveau compte. L'accès sécurisé à votre espace client est prêt.</p>
             </section>
 
             <section class="auth-forms">
                 <div class="panel login-panel">
-                    <h2>Sign in</h2>
-                    <p>Welcome back. Use your full name and your password to access the dashboard.</p>
+                    <h2>Connexion</h2>
+                    <p>Bon retour. Utilisez votre nom complet et votre mot de passe pour accéder au tableau de bord.</p>
 
                     {% if login_error %}
                         <div class="alert">{{ login_error }}</div>
@@ -143,22 +155,22 @@
                         <input type="hidden" name="action" value="login">
 
                         <div class="form-group">
-                            <label for="id_name">Name / First Name</label>
-                            <input type="text" name="name" id="id_name" class="form-control" placeholder="Enter your name" required>
+                            <label for="id_name">Nom / Prénom</label>
+                            <input type="text" name="name" id="id_name" class="form-control" placeholder="Saisissez votre nom" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="id_password">Password</label>
-                            <input type="password" name="password" id="id_password" class="form-control" placeholder="Enter your password" required>
+                            <label for="id_password">Mot de passe</label>
+                            <input type="password" name="password" id="id_password" class="form-control" placeholder="Saisissez votre mot de passe" required>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Log in</button>
+                        <button type="submit" class="btn btn-primary">Se connecter</button>
                     </form>
                 </div>
 
                 <div class="panel signup-panel">
-                    <h2>Create your account</h2>
-                    <p>New here? Create an account and start from your dashboard.</p>
+                    <h2>Créer votre compte</h2>
+                    <p>Nouveau ici ? Créez un compte et démarrez depuis votre tableau de bord.</p>
 
                     <form method="POST">
                         {% csrf_token %}
@@ -173,12 +185,12 @@
                                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 {{ field }}
                                 {% if field.errors %}
-                                    <div class="alert" style="margin-top: 8px;">{{ field.errors.0 }}</div>
+                                    <div class="field-error">{{ field.errors.0 }}</div>
                                 {% endif %}
                             </div>
                         {% endfor %}
 
-                        <button type="submit" class="btn btn-primary">Create account</button>
+                        <button type="submit" class="btn btn-primary">Créer le compte</button>
                     </form>
                 </div>
             </section>

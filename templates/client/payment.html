@@ -1,22 +1,19 @@
 {% extends 'client/base.html' %}
-{% block title %}Pay Bill | CBS{% endblock %}
-{% block page_heading %}Pay Bill{% endblock %}
+{% block title %}Paiement de facture | CBS{% endblock %}
+{% block page_heading %}Paiement de facture{% endblock %}
+{% block topbar_tagline %}Réglez vos factures auprès des fournisseurs enregistrés.{% endblock %}
 
 {% block content %}
 <div class="grid-2">
     <div class="card">
         <div class="card-header">
-            <h3>Bill payment</h3>
+            <h3>Paiement de facture</h3>
         </div>
 
         {% if messages %}
-            <div class="card" style="margin-bottom: 1rem;">
+            <div class="card">
                 {% for message in messages %}
-                    {% if message.tags == 'success' %}
-                        <p style="color: green; margin: 0.5rem 0;">{{ message }}</p>
-                    {% else %}
-                        <p style="color: red; margin: 0.5rem 0;">{{ message }}</p>
-                    {% endif %}
+                    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">{{ message }}</div>
                 {% endfor %}
             </div>
         {% endif %}
@@ -24,9 +21,9 @@
         <form id="payment-form" method="post">
             {% csrf_token %}
             <div class="form-group">
-                <label for="provider-select">Service provider</label>
+                <label for="provider-select">Fournisseur</label>
                 <select class="form-control" id="provider-select" name="provider" required>
-                    <option value="" disabled {% if not payment_form.provider.value %}selected{% endif %}>Select provider...</option>
+                    <option value="" disabled {% if not payment_form.provider.value %}selected{% endif %}>Sélectionnez un fournisseur...</option>
                     {% for provider in providers %}
                         <option value="{{ provider.id }}" {% if payment_form.provider.value|stringformat:'s' == provider.id|stringformat:'s' %}selected{% endif %}>
                             {{ provider.name }} ({{ provider.category }})
@@ -39,12 +36,12 @@
             </div>
 
             <div class="form-group">
-                <label for="bill-select">Bill</label>
+                <label for="bill-select">Facture</label>
                 <select class="form-control" id="bill-select" name="bill" required>
-                    <option value="" disabled {% if not payment_form.bill.value %}selected{% endif %}>Select bill...</option>
+                    <option value="" disabled {% if not payment_form.bill.value %}selected{% endif %}>Sélectionnez une facture...</option>
                     {% for bill in bills %}
                         <option value="{{ bill.id }}" data-provider="{{ bill.provider_id }}" data-amount="{{ bill.remaining_amount }}" {% if payment_form.bill.value|stringformat:'s' == bill.id|stringformat:'s' %}selected{% endif %}>
-                            {{ bill.provider.name }} - {{ bill.reference_number }} (remaining {{ bill.remaining_amount }} {{ bill.currency|default:'USD' }})
+                            {{ bill.provider.name }} - {{ bill.reference_number }} (restant {{ bill.remaining_amount }} {{ bill.currency|default:'USD' }})
                         </option>
                     {% endfor %}
                 </select>
@@ -54,17 +51,17 @@
             </div>
 
             <div class="form-group">
-                <label for="payment-amount">Amount</label>
-                <p id="remaining-balance-help" class="empty-state">Select a bill to see the remaining amount to pay.</p>
-                <input 
-                    class="form-control" 
-                    id="payment-amount" 
-                    name="amount" 
-                    type="number" 
-                    step="0.01" 
-                    min="0.01" 
-                    placeholder="Enter amount" 
-                    value="{{ payment_form.amount.value|default_if_none:'' }}" 
+                <label for="payment-amount">Montant</label>
+                <p id="remaining-balance-help" class="empty-state">Sélectionnez une facture pour voir le montant restant à payer.</p>
+                <input
+                    class="form-control"
+                    id="payment-amount"
+                    name="amount"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    placeholder="Saisissez le montant"
+                    value="{{ payment_form.amount.value|default_if_none:'' }}"
                     required
                 />
                 {% if payment_form.errors.amount %}
@@ -78,42 +75,44 @@
                 </div>
             {% endif %}
 
-            <button class="btn btn-primary" type="submit">Submit payment</button>
+            <button class="btn btn-primary" type="submit">Soumettre le paiement</button>
         </form>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <h3>Unpaid bills</h3>
+            <h3>Factures impayées</h3>
         </div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Provider</th>
-                    <th>Reference</th>
-                    <th>Amount due</th>
-                    <th>Remaining to pay</th>
-                    <th>Currency</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if bills %}
-                    {% for bill in bills %}
-                        <tr>
-                            <td>{{ bill.provider.name }}</td>
-                            <td>{{ bill.reference_number }}</td>
-                            <td>{{ bill.amount_due }}</td>
-                            <td>{{ bill.remaining_amount }}</td>
-                            <td>{{ bill.currency|default:'USD' }}</td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td colspan="5">No unpaid bills.</td>
+                        <th>Fournisseur</th>
+                        <th>Référence</th>
+                        <th>Montant dû</th>
+                        <th>Restant à payer</th>
+                        <th>Devise</th>
                     </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% if bills %}
+                        {% for bill in bills %}
+                            <tr>
+                                <td>{{ bill.provider.name }}</td>
+                                <td>{{ bill.reference_number }}</td>
+                                <td>{{ bill.amount_due }}</td>
+                                <td>{{ bill.remaining_amount }}</td>
+                                <td>{{ bill.currency|default:'USD' }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5">Aucune facture impayée.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -151,10 +150,10 @@
         if (selectedOption && selectedOption.dataset.amount) {
             amountInput.value = selectedOption.dataset.amount;
             if (remainingBalanceHelp) {
-                remainingBalanceHelp.textContent = `Remaining to pay: ${selectedOption.dataset.amount}`;
+                remainingBalanceHelp.textContent = `Restant à payer : ${selectedOption.dataset.amount}`;
             }
         } else if (remainingBalanceHelp) {
-            remainingBalanceHelp.textContent = 'Select a bill to see the remaining amount to pay.';
+            remainingBalanceHelp.textContent = 'Sélectionnez une facture pour voir le montant restant à payer.';
         }
     }
 

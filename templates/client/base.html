@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Client Portal{% endblock %}</title>
+    <title>{% block title %}Portail Client{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -80,6 +80,9 @@
             font-weight: 600;
             transition: all 0.2s ease;
             border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
         }
 
         .nav-link:hover {
@@ -214,7 +217,54 @@
 
         .badge.success { background: rgba(22, 163, 74, 0.12); color: var(--success); }
         .badge.warning { background: rgba(245, 158, 11, 0.12); color: var(--warning); }
+        .badge.danger { background: rgba(220, 38, 38, 0.12); color: var(--danger); }
         .badge.info { background: rgba(15, 118, 110, 0.12); color: var(--info); }
+
+        .alert {
+            padding: 0.7rem 0.9rem;
+            border-radius: 10px;
+            margin: 0.6rem 0;
+            font-size: 0.92rem;
+            border: 1px solid transparent;
+        }
+        .alert-success { background: rgba(22, 163, 74, 0.10); color: #166534; border-color: rgba(22, 163, 74, 0.25); }
+        .alert-danger  { background: rgba(220, 38, 38, 0.08); color: #991b1b; border-color: rgba(220, 38, 38, 0.25); }
+        .alert-warning { background: rgba(245, 158, 11, 0.10); color: #92400e; border-color: rgba(245, 158, 11, 0.25); }
+        .alert-info    { background: rgba(37, 99, 235, 0.08); color: #1e40af; border-color: rgba(37, 99, 235, 0.20); }
+
+        :focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .card.narrow { max-width: 520px; }
+        .card + .card { margin-top: 1rem; }
+        .form-row {
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .table tbody tr { transition: background 0.15s ease; }
+        .table tbody tr:hover { background: var(--surface-soft); }
+        .table-wrap { overflow-x: auto; }
+        .amount { font-weight: 700; }
+        .amount-in { color: var(--success); }
+        .amount-out { color: var(--danger); }
+        .empty-row { text-align: center; color: #6b7280; }
 
         .quick-grid {
             display: grid;
@@ -292,19 +342,55 @@
             <div class="brand">CBS Client</div>
             <nav class="nav-list">
                 {% if client %}
-                <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'client-dashboard-by-id' client.id %}">Dashboard</a>
-                <a class="nav-link {% if active_page == 'wallet' %}active{% endif %}" href="{% url 'client-wallet-by-id' client.id %}">Wallet</a>
-                <a class="nav-link {% if active_page == 'deposit' %}active{% endif %}" href="{% url 'client-deposit-by-id' client.id %}">Deposit</a>
-                <a class="nav-link {% if active_page == 'transfer' %}active{% endif %}" href="{% url 'client-transfer-by-id' client.id %}">Transfer</a>
-                <a class="nav-link {% if active_page == 'payment' %}active{% endif %}" href="{% url 'client-payment-by-id' client.id %}">Payment</a>
-                <a class="nav-link {% if active_page == 'report' %}active{% endif %}" href="{% url 'client-report-by-id' client.id %}">Reports</a>
+                <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'client-dashboard-by-id' client.id %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    Tableau de bord
+                </a>
+                <a class="nav-link {% if active_page == 'wallet' %}active{% endif %}" href="{% url 'client-wallet-by-id' client.id %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h15a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><path d="M3 7v10"/><path d="M16 13h2"/></svg>
+                    Portefeuille
+                </a>
+                <a class="nav-link {% if active_page == 'deposit' %}active{% endif %}" href="{% url 'client-deposit-by-id' client.id %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                    Dépôt
+                </a>
+                <a class="nav-link {% if active_page == 'transfer' %}active{% endif %}" href="{% url 'client-transfer-by-id' client.id %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M18 17H7l3 3"/></svg>
+                    Virement
+                </a>
+                <a class="nav-link {% if active_page == 'payment' %}active{% endif %}" href="{% url 'client-payment-by-id' client.id %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M9 11h6"/><path d="M9 15h4"/></svg>
+                    Paiement
+                </a>
+                <a class="nav-link {% if active_page == 'report' %}active{% endif %}" href="{% url 'client-report-by-id' client.id %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
+                    Historique
+                </a>
                 {% else %}
-                <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'client-dashboard' %}">Dashboard</a>
-                <a class="nav-link {% if active_page == 'wallet' %}active{% endif %}" href="{% url 'client-wallet' %}">Wallet</a>
-                <a class="nav-link {% if active_page == 'deposit' %}active{% endif %}" href="{% url 'client-deposit' %}">Deposit</a>
-                <a class="nav-link {% if active_page == 'transfer' %}active{% endif %}" href="{% url 'client-transfer' %}">Transfer</a>
-                <a class="nav-link {% if active_page == 'payment' %}active{% endif %}" href="{% url 'client-payment' %}">Payment</a>
-                <a class="nav-link {% if active_page == 'report' %}active{% endif %}" href="{% url 'client-report' %}">Reports</a>
+                <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'client-dashboard' %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    Tableau de bord
+                </a>
+                <a class="nav-link {% if active_page == 'wallet' %}active{% endif %}" href="{% url 'client-wallet' %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h15a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><path d="M3 7v10"/><path d="M16 13h2"/></svg>
+                    Portefeuille
+                </a>
+                <a class="nav-link {% if active_page == 'deposit' %}active{% endif %}" href="{% url 'client-deposit' %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                    Dépôt
+                </a>
+                <a class="nav-link {% if active_page == 'transfer' %}active{% endif %}" href="{% url 'client-transfer' %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M18 17H7l3 3"/></svg>
+                    Virement
+                </a>
+                <a class="nav-link {% if active_page == 'payment' %}active{% endif %}" href="{% url 'client-payment' %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M9 11h6"/><path d="M9 15h4"/></svg>
+                    Paiement
+                </a>
+                <a class="nav-link {% if active_page == 'report' %}active{% endif %}" href="{% url 'client-report' %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
+                    Historique
+                </a>
                 {% endif %}
             </nav>
         </aside>
@@ -313,9 +399,11 @@
             <header class="topbar">
                 <div>
                     <h1>{% block page_heading %}{{ page_title }}{% endblock %}</h1>
-                    <p>Manage wallets, transfers, and deposits from a clean, simple dashboard.</p>
+                    <p>{% block topbar_tagline %}Gérez vos portefeuilles, virements et dépôts depuis un tableau de bord clair et simple.{% endblock %}</p>
                 </div>
-                <button class="btn-refresh" type="button">↻</button>
+                <button class="btn-refresh" type="button" aria-label="Actualiser la page">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+                </button>
             </header>
 
             {% block content %}{% endblock %}
@@ -328,7 +416,7 @@
             if (refreshButton) {
                 refreshButton.addEventListener('click', function () {
                     refreshButton.classList.add('spinning');
-                    setTimeout(function () { refreshButton.classList.remove('spinning'); }, 900);
+                    window.location.reload();
                 });
             }
         });
